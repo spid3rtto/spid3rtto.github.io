@@ -67,3 +67,63 @@ table {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
   border-color: #0366d6;
 }
+
+// Dark mode
+:root {
+  --bg-primary: #f8f9fa;
+  --bg-card: #ffffff;
+  --border-card: #e1e4e8;
+  --text-primary: #24292e;
+  --text-secondary: #586069;
+  --accent-color: #0366d6;
+  --card-shadow: rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: rgba(0, 0, 0, 0.1);
+}
+
+/* Detección automática del Modo Oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0d1117;        /* Fondo oscuro estilo GitHub Dark */
+    --bg-card: #161b22;           /* Fondo de las tarjetas */
+    --border-card: #30363d;       /* Borde sutil oscuro */
+    --text-primary: #c9d1d9;       /* Texto principal legible */
+    --text-secondary: #8b949e;     /* Fechas y texto secundario */
+    --accent-color: #58a6ff;       /* Azul brillante para hover/links */
+    --card-shadow: rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Aplicación de colores al fondo general y cuerpo */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Estilo de las tarjetas encuadradas en Modo Claro/Oscuro */
+.posts > entry, .posts > article, .posts > div, article.post, div.post {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Efecto Hover adaptativo */
+.posts > entry:hover, .posts > article:hover, .posts > div:hover, article.post:hover, div.post:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--card-shadow-hover);
+  border-color: var(--accent-color);
+}
+
+/* Enlaces y textos secundarios adaptados */
+.posts .date, .post-date {
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--accent-color);
+}
