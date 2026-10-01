@@ -52,61 +52,37 @@ table {
   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
 
-/* Contenedor principal de la tarjeta/post */
+/* ==========================================
+   ENCUADRE PARA POSTS (Borde negro directo)
+   ========================================== */
+
 .posts > entry, 
 .posts > article, 
 .posts > div, 
 article.post, 
 div.post {
-  background-color: #ffffff;         /* Fondo blanco puro */
-  border: 2px solid #000000;          /* Borde negro definido y visible */
-  border-radius: 8px;                 /* Bordes ligeramente redondeados */
-  padding: 24px 28px;                 /* Margen interno para despegar las letras del borde */
-  margin-bottom: 28px;                /* Separación vertical entre tarjetas */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08); /* Sombra sutil para dar relieve */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Efecto al pasar el cursor (hover) */
-.posts > entry:hover, 
-.posts > article:hover, 
-.posts > div:hover, 
-article.post:hover, 
-div.post:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
-}
-
-/* Tipografía y colores dentro del cuadro */
 .posts h1, .posts h2, .posts h3 {
-  color: #000000 !important;          /* Título en negro intenso */
-  font-weight: 700;
+  color: #000000 !important;
   margin-top: 0;
   margin-bottom: 10px;
 }
 
-.posts p, article.post p {
-  color: #1a1a1a;                     /* Texto del post en gris muy oscuro (alta legibilidad) */
-  font-size: 1rem;
-  line-height: 1.6;                   /* Espacio cómodo entre líneas */
+.posts p {
+  color: #1a1a1a;
+  line-height: 1.6;
   margin-bottom: 12px;
 }
 
-/* Fecha e información del post */
 .posts .date, .posts .post-date, .date {
-  color: #555555;                     /* Gris intermedio para diferenciar de las letras del post */
+  color: #555555;
   font-size: 0.85rem;
-  font-weight: 600;
   margin-bottom: 14px;
-}
-
-/* Enlaces */
-.posts a {
-  color: #0056b3;                     /* Azul para hacer clic */
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.posts a:hover {
-  text-decoration: underline;
 }
