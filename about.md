@@ -4,10 +4,10 @@ title: About
 permalink: /about/
 ---
 
-spid3rtto's personal blog. Hack The Box write-ups, cybersecurity projects and hardware hacking
+In this blog you will learn exploitation techniques and attacks on different types of vulnerabilities. You will create hardware devices for hacking and pentesting.
 
 ### Goals / Getting Certified: 
-* [ ] OSCP %
-* [ ] OSEP %
-* [ ] CEH %
-* [ ] OSWP
+* OSCP
+* OSEP
+* CEH
+* OSWP
