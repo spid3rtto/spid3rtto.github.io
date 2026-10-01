@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+spid3rtto's personal blog. Hack The Box write-ups, cybersecurity projects and hardware hacking
 
 ### More Information
 
