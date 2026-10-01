@@ -18,7 +18,6 @@ avatar: https://raw.githubusercontent.com/spid3rtto/spid3rtto.github.io/refs/hea
 footer-links:
   dribbble:
   email:
-  youtube: @spid3rtto
   facebook:
   flickr:
   github: spid3rtto
@@ -28,7 +27,7 @@ footer-links:
   rss: # just type anything here for a working RSS icon
   twitter: jekyllrb
   stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
-  youtube: # channel/<your_long_string> or user/<user-name>
+  youtube: @spid3rtto # channel/<your_long_string> or user/<user-name>
   googleplus: # anything in your profile username that comes after plus.google.com/
 
 
