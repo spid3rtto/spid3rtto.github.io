@@ -127,3 +127,49 @@ body {
 a {
   color: var(--accent-color);
 }
+
+/* 1. Definición del cuadro contenedor */
+.posts > entry, .posts > article, .posts > div, article.post, div.post {
+  background-color: #ffffff;      /* Fondo blanco puro para resaltar el texto */
+  border: 1px solid #1a1a1a;       /* Borde encuadrado en negro oscuro definido */
+  border-radius: 8px;
+  padding: 24px 28px;              /* Espacio entre el borde negro y las letras */
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 2. Título del post dentro de la tarjeta */
+.posts h1, .posts h2, .posts h3, 
+article.post h1, article.post h2 {
+  color: #0d1117 !important;       /* Negro/Gris muy oscuro para máxima legibilidad */
+  font-weight: 700;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+/* 3. Texto del extracto / cuerpo del post */
+.posts p, article.post p {
+  color: #24292f;                  /* Gris oscuro lectura (evita fatiga visual) */
+  font-size: 1em;
+  line-height: 1.6;                /* Espaciado entre líneas para leer cómodo */
+  margin-bottom: 12px;
+}
+
+/* 4. Fecha y metadatos (Diferenciados en gris sutil) */
+.posts .date, .posts .post-date, .date {
+  color: #57606a;                  /* Gris medio para no competir con el título */
+  font-size: 0.85em;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+/* 5. Enlaces "Leer más" o títulos clickeables */
+.posts a, article.post a {
+  color: #0969da;                  /* Azul para diferenciar enlaces del texto negro */
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.posts a:hover {
+  text-decoration: underline;
+}
