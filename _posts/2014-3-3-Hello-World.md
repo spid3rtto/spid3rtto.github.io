@@ -1,9 +1,10 @@
 ---
 layout: post
-title: You're up and running!
+title: How to create a hardware hack with an ESP32-WROOM
 ---
 
-Next you can update your site name, avatar and other options using the _config.yml file in the root of your repository (shown below).
+Surely you have seen in some movies hackers different devices that they use to hack whatever they want, and you have probably wanted to have one. 
+In this post you will learn how to assemble one without having an advanced level in electronics
 
 ![_config.yml]({{ site.baseurl }}/images/config.png)
 
