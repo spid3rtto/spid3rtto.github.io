@@ -52,17 +52,15 @@ table {
   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
 }
 
-/* ==========================================
-   ENCUADRE PARA POSTS (Borde negro directo)
-   ========================================== */
-
+// Bordes
 .posts > entry, 
 .posts > article, 
 .posts > div, 
 article.post, 
 div.post {
   background-color: #ffffff;
-  border: 2px solid #000000;
+  border: 2px solid #000000 !important;
+  border-bottom: 2px solid #000000 !important; /* Forzado explícito del borde inferior */
   border-radius: 8px;
   padding: 24px 28px;
   margin-bottom: 28px;
