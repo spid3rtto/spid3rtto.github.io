@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>{% if page.title %}{{ page.title }} – {% endif %}{{ site.name }} – {{ site.description }}</title>
 
     {% include meta.html %}
@@ -48,18 +49,21 @@
 
     {% include analytics.html %}
 
+    <!-- Carga de Medium Zoom desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Aplica el efecto de zoom a todas las imágenes dentro de los posts
-    mediumZoom('.post img, article img, .posts img', {
-      margin: 24,
-      background: 'rgba(0, 0, 0, 0.85)', // Fondo oscuro transparente al agrandar
-      scrollOffset: 0
-    });
-  });
-</script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Detecta si es pantalla móvil para ajustar márgenes
+        const isMobile = window.innerWidth <= 768;
+
+        mediumZoom('.post img, article img, .posts img', {
+          margin: isMobile ? 0 : 24,          // En móvil la imagen ocupa el 100% del ancho
+          background: 'rgba(0, 0, 0, 0.95)',  // Fondo oscuro para resaltar detalles
+          scrollOffset: 40
+        });
+      });
+    </script>
     
   </body>
 </html>
