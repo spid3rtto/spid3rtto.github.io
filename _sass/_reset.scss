@@ -84,3 +84,60 @@ div.post {
   font-size: 0.85rem;
   margin-bottom: 14px;
 }
+
+/* ==========================================
+   ENCUADRE Y BORDES RESPONSIVOS (SPID3RTTTO)
+   ========================================== */
+
+/* Configuración base (Para teléfonos se mantiene intacta) */
+.posts > entry, 
+.posts > article, 
+.posts > div, 
+article.post, 
+div.post {
+  background-color: #ffffff;
+  border: 2px solid #000000 !important;
+  border-bottom: 2px solid #000000 !important;
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Pantallas de PC y Laptop (Pantallas mayores a 768px) */
+@media screen and (min-width: 768px) {
+  /* Amplía el ancho del contenedor principal en la versión de escritorio */
+  .container, #main, .wrapper-masthead .container {
+    max-width: 900px !important; /* Agranda la tarjeta reduciendo el espacio lateral sobrante */
+    width: 90% !important;
+  }
+
+  .posts > entry, 
+  .posts > article, 
+  .posts > div, 
+  article.post, 
+  div.post {
+    padding: 32px 36px; /* Más espacio interno dentro del cuadro para la versión PC */
+  }
+}
+
+/* Tipografía y textos dentro del encuadre */
+.posts h1, .posts h2, .posts h3 {
+  color: #000000 !important;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.posts p {
+  color: #1a1a1a;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.posts .date, .posts .post-date, .date {
+  color: #555555;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
