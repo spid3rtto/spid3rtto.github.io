@@ -67,3 +67,111 @@
     
   </body>
 </html>
+
+<!-- Carga de Panzoom para Zoom con Rueda de Mouse y Gestos Táctiles -->
+<script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+
+<style>
+  /* Fondo oscuro y modal para cuando se agrande la imagen */
+  .image-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    touch-action: none; /* Permite control total de gestos en móviles */
+  }
+
+  .image-modal-overlay img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    cursor: grab;
+  }
+
+  .image-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: #fff;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 100000;
+    font-family: monospace;
+  }
+</style>
+
+<!-- Modal dinámico donde se expande la imagen -->
+<div id="imageModal" class="image-modal-overlay">
+  <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+  <img id="modalImage" src="" alt="Zoom Image">
+</div>
+
+<script>
+  let panzoomInstance = null;
+  const modal = document.getElementById('imageModal');
+  const modalImg = document.getElementById('modalImage');
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Detecta clics en cualquier imagen de los posts
+    const postImages = document.querySelectorAll('.post img, article img, .posts img');
+    
+    postImages.forEach(img => {
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', function () {
+        openImageModal(this.src);
+      });
+    });
+  });
+
+  function openImageModal(src) {
+    modalImg.src = src;
+    modal.style.display = 'flex';
+
+    // Inicializa el control de zoom en la imagen modal
+    panzoomInstance = Panzoom(modalImg, {
+      maxScale: 6,           // Zoom máximo de 6x
+      minScale: 1,           // Zoom mínimo
+      contain: 'outside',
+      canvas: true
+    });
+
+    // Zoom con la rueda del mouse en PC (Sube/Baja)
+    modalImg.parentElement.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      panzoomInstance.zoomWithWheel(e);
+    });
+
+    // Cierra el modal con la tecla ESC
+    document.addEventListener('keydown', handleEsc);
+  }
+
+  function closeImageModal() {
+    modal.style.display = 'none';
+    if (panzoomInstance) {
+      panzoomInstance.destroy();
+      panzoomInstance = null;
+    }
+    document.removeEventListener('keydown', handleEsc);
+  }
+
+  function handleEsc(e) {
+    if (e.key === 'Escape') {
+      closeImageModal();
+    }
+  }
+
+  // Clic en el fondo fuera de la imagen para cerrar
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeImageModal();
+    }
+  });
+</script>
