@@ -68,11 +68,7 @@
   </body>
 </html>
 
-<!-- Carga de Panzoom para Zoom con Rueda de Mouse y Gestos Táctiles -->
-<script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
-
 <style>
-  /* Fondo oscuro y modal para cuando se agrande la imagen */
   .image-modal-overlay {
     display: none;
     position: fixed;
@@ -80,127 +76,170 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.95); /* Fondo más oscuro para enfoque */
-    z-index: 99999;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 999999;
+    touch-action: none; /* Bloquea el scroll de la página en móvil */
+  }
+
+  .image-modal-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
-    /* IMPORTANTE: ESTAS LÍNEAS PREVIENEN EL SCROLL NATIVO */
-    touch-action: none; 
-    overscroll-behavior: contain;
+    width: 100%;
+    height: 100%;
   }
 
   .image-modal-overlay img {
-    /* La imagen inicia normal */
-    max-width: 90%;
-    max-height: 90%;
+    max-width: 90vw;
+    max-height: 90vh;
     object-fit: contain;
-    cursor: grab;
-    /* IMPORTANTE: PARA CÁLCULOS DE PANZOOM */
+    user-select: none;
+    -webkit-user-drag: none;
+    will-change: transform;
     transform-origin: center center;
   }
 
-  /* Botón de cierre más usable en celular */
   .image-modal-close {
     position: absolute;
     top: 15px;
     right: 20px;
     color: #fff;
-    font-size: 36px; /* Más grande para tocar con el dedo */
+    font-size: 34px;
     font-weight: bold;
     cursor: pointer;
-    z-index: 100000;
+    z-index: 1000000;
     font-family: monospace;
-    opacity: 0.8;
-    padding: 10px; /* Área de toque extendida */
-  }
-  .image-modal-close:hover {
-    opacity: 1;
+    padding: 10px;
   }
 </style>
 
-<!-- Modal dinámico donde se expande la imagen -->
 <div id="imageModal" class="image-modal-overlay">
   <span class="image-modal-close" id="modalClose">&times;</span>
-  <img id="modalImage" src="" alt="Zoom Image">
+  <div class="image-modal-container" id="modalContainer">
+    <img id="modalImage" src="" alt="Zoom Image">
+  </div>
 </div>
 
 <script>
-  let panzoomInstance = null;
-  const modal = document.getElementById('imageModal');
-  const modalImg = document.getElementById('modalImage');
-  const closeBtn = document.getElementById('modalClose');
+  (function() {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeBtn = document.getElementById('modalClose');
+    const container = document.getElementById('modalContainer');
 
-  document.addEventListener('DOMContentLoaded', function () {
-    // Detecta clics en cualquier imagen de los posts
-    const postImages = document.querySelectorAll('.post img, article img, .posts img');
-    
-    postImages.forEach(img => {
-      img.style.cursor = 'zoom-in';
-      img.addEventListener('click', function (e) {
-        // Previene comportamientos nativos y abre el modal
-        e.preventDefault();
-        e.stopPropagation();
-        openImageModal(this.src);
+    let scale = 1;
+    let pointX = 0;
+    let pointY = 0;
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+    let initialPinchDistance = null;
+    let initialScale = 1;
+
+    function updateTransform() {
+      modalImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+    }
+
+    function resetZoom() {
+      scale = 1;
+      pointX = 0;
+      pointY = 0;
+      updateTransform();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const postImages = document.querySelectorAll('.post img, article img, .posts img');
+      postImages.forEach(img => {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', function(e) {
+          e.preventDefault();
+          modalImg.src = this.src;
+          resetZoom();
+          modal.style.display = 'block';
+        });
       });
     });
 
-    // Control del botón de cierre y clic fuera
-    closeBtn.addEventListener('click', closeImageModal);
+    closeBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+      modalImg.src = '';
+    });
+
     modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        closeImageModal();
+      if (e.target === modal || e.target === container) {
+        modal.style.display = 'none';
+        modalImg.src = '';
       }
     });
-  });
 
-  function openImageModal(src) {
-    // 1. Resetea estado de scroll de la página principal (opcional, previene saltos)
-    // document.body.style.overflow = 'hidden'; 
+    // Zoom con rueda del mouse en PC (Sube / Baja)
+    container.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      const xs = (e.clientX - window.innerWidth / 2 - pointX) / scale;
+      const ys = (e.clientY - window.innerHeight / 2 - pointY) / scale;
+      
+      let delta = -e.deltaY;
+      let newScale = delta > 0 ? scale * 1.15 : scale / 1.15;
+      
+      if (newScale < 1) newScale = 1;
+      if (newScale > 6) newScale = 6;
 
-    modalImg.src = src;
-    modal.style.display = 'flex';
+      pointX = (e.clientX - window.innerWidth / 2) - xs * newScale;
+      pointY = (e.clientY - window.innerHeight / 2) - ys * newScale;
+      scale = newScale;
 
-    // 2. Espera un microsegundo a que el DOM posicione el flex
-    setTimeout(() => {
-        // Inicializa el control de zoom en la imagen modal
-        panzoomInstance = Panzoom(modalImg, {
-          maxScale: 6,           // Zoom máximo
-          minScale: 1,           // Zoom mínimo
-          contain: 'outside',    // Evita arrastrar la imagen fuera del borde al 1x
-          canvas: false,         // Usar escalado CSS nativo (más suave)
-          cursor: 'grab'
-        });
+      if (scale === 1) { pointX = 0; pointY = 0; }
+      updateTransform();
+    }, { passive: false });
 
-        // Zoom con la rueda del mouse en PC (Sube/Baja)
-        modal.addEventListener('wheel', function(e) {
-          if (!panzoomInstance) return;
-          e.preventDefault();
-          panzoomInstance.zoomWithWheel(e);
-        }, { passive: false }); // Obligatorio para preventDefault en wheel
+    // Controles táctiles para Móvil (Touch Events)
+    container.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX - pointX;
+        startY = e.touches[0].clientY - pointY;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        initialPinchDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialScale = scale;
+      }
+    }, { passive: true });
 
-        // Cierra el modal con la tecla ESC
-        document.addEventListener('keydown', handleEsc);
-    }, 10);
-  }
+    container.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 1 && isDragging && scale > 1) {
+        e.preventDefault();
+        pointX = e.touches[0].clientX - startX;
+        pointY = e.touches[0].clientY - startY;
+        updateTransform();
+      } else if (e.touches.length === 2 && initialPinchDistance) {
+        e.preventDefault();
+        const currentDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        let newScale = initialScale * (currentDistance / initialPinchDistance);
+        if (newScale < 1) newScale = 1;
+        if (newScale > 6) newScale = 6;
+        scale = newScale;
+        if (scale === 1) { pointX = 0; pointY = 0; }
+        updateTransform();
+      }
+    }, { passive: false });
 
-  function closeImageModal() {
-    modal.style.display = 'none';
-    
-    // Reactiva scroll de la página (si se desactivó)
-    // document.body.style.overflow = ''; 
-
-    if (panzoomInstance) {
-      panzoomInstance.destroy();
-      panzoomInstance = null;
-    }
-    document.removeEventListener('keydown', handleEsc);
-    modalImg.src = ''; // Limpia fuente para el próximo uso
-  }
-
-  function handleEsc(e) {
-    if (e.key === 'Escape') {
-      closeImageModal();
-    }
-  }
+    container.addEventListener('touchend', function(e) {
+      if (e.touches.length < 2) {
+        initialPinchDistance = null;
+      }
+      if (e.touches.length === 0) {
+        isDragging = false;
+      }
+    });
+  })();
 </script>
