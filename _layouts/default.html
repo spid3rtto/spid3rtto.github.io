@@ -80,37 +80,48 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95); /* Fondo más oscuro para enfoque */
     z-index: 99999;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    touch-action: none; /* Permite control total de gestos en móviles */
+    /* IMPORTANTE: ESTAS LÍNEAS PREVIENEN EL SCROLL NATIVO */
+    touch-action: none; 
+    overscroll-behavior: contain;
   }
 
   .image-modal-overlay img {
+    /* La imagen inicia normal */
     max-width: 90%;
     max-height: 90%;
     object-fit: contain;
     cursor: grab;
+    /* IMPORTANTE: PARA CÁLCULOS DE PANZOOM */
+    transform-origin: center center;
   }
 
+  /* Botón de cierre más usable en celular */
   .image-modal-close {
     position: absolute;
-    top: 20px;
-    right: 25px;
+    top: 15px;
+    right: 20px;
     color: #fff;
-    font-size: 30px;
+    font-size: 36px; /* Más grande para tocar con el dedo */
     font-weight: bold;
     cursor: pointer;
     z-index: 100000;
     font-family: monospace;
+    opacity: 0.8;
+    padding: 10px; /* Área de toque extendida */
+  }
+  .image-modal-close:hover {
+    opacity: 1;
   }
 </style>
 
 <!-- Modal dinámico donde se expande la imagen -->
 <div id="imageModal" class="image-modal-overlay">
-  <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+  <span class="image-modal-close" id="modalClose">&times;</span>
   <img id="modalImage" src="" alt="Zoom Image">
 </div>
 
@@ -118,6 +129,7 @@
   let panzoomInstance = null;
   const modal = document.getElementById('imageModal');
   const modalImg = document.getElementById('modalImage');
+  const closeBtn = document.getElementById('modalClose');
 
   document.addEventListener('DOMContentLoaded', function () {
     // Detecta clics en cualquier imagen de los posts
@@ -125,41 +137,65 @@
     
     postImages.forEach(img => {
       img.style.cursor = 'zoom-in';
-      img.addEventListener('click', function () {
+      img.addEventListener('click', function (e) {
+        // Previene comportamientos nativos y abre el modal
+        e.preventDefault();
+        e.stopPropagation();
         openImageModal(this.src);
       });
+    });
+
+    // Control del botón de cierre y clic fuera
+    closeBtn.addEventListener('click', closeImageModal);
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeImageModal();
+      }
     });
   });
 
   function openImageModal(src) {
+    // 1. Resetea estado de scroll de la página principal (opcional, previene saltos)
+    // document.body.style.overflow = 'hidden'; 
+
     modalImg.src = src;
     modal.style.display = 'flex';
 
-    // Inicializa el control de zoom en la imagen modal
-    panzoomInstance = Panzoom(modalImg, {
-      maxScale: 6,           // Zoom máximo de 6x
-      minScale: 1,           // Zoom mínimo
-      contain: 'outside',
-      canvas: true
-    });
+    // 2. Espera un microsegundo a que el DOM posicione el flex
+    setTimeout(() => {
+        // Inicializa el control de zoom en la imagen modal
+        panzoomInstance = Panzoom(modalImg, {
+          maxScale: 6,           // Zoom máximo
+          minScale: 1,           // Zoom mínimo
+          contain: 'outside',    // Evita arrastrar la imagen fuera del borde al 1x
+          canvas: false,         // Usar escalado CSS nativo (más suave)
+          cursor: 'grab'
+        });
 
-    // Zoom con la rueda del mouse en PC (Sube/Baja)
-    modalImg.parentElement.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      panzoomInstance.zoomWithWheel(e);
-    });
+        // Zoom con la rueda del mouse en PC (Sube/Baja)
+        modal.addEventListener('wheel', function(e) {
+          if (!panzoomInstance) return;
+          e.preventDefault();
+          panzoomInstance.zoomWithWheel(e);
+        }, { passive: false }); // Obligatorio para preventDefault en wheel
 
-    // Cierra el modal con la tecla ESC
-    document.addEventListener('keydown', handleEsc);
+        // Cierra el modal con la tecla ESC
+        document.addEventListener('keydown', handleEsc);
+    }, 10);
   }
 
   function closeImageModal() {
     modal.style.display = 'none';
+    
+    // Reactiva scroll de la página (si se desactivó)
+    // document.body.style.overflow = ''; 
+
     if (panzoomInstance) {
       panzoomInstance.destroy();
       panzoomInstance = null;
     }
     document.removeEventListener('keydown', handleEsc);
+    modalImg.src = ''; // Limpia fuente para el próximo uso
   }
 
   function handleEsc(e) {
@@ -167,11 +203,4 @@
       closeImageModal();
     }
   }
-
-  // Clic en el fondo fuera de la imagen para cerrar
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
-      closeImageModal();
-    }
-  });
 </script>
