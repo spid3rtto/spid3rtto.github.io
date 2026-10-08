@@ -69,6 +69,7 @@
 </html>
 
 <style>
+  /* Contenedor principal con Flexbox para centrado absoluto perfecto */
   .image-modal-overlay {
     display: none;
     position: fixed;
@@ -82,26 +83,36 @@
   }
 
   .image-modal-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    position: relative !important;
   }
 
-  .image-modal-overlay img {
-    max-width: 90vw;
-    max-height: 90vh;
-    object-fit: contain;
-    user-select: none;
-    -webkit-user-drag: none;
+  /* Reset absoluto para aislar la imagen de cualquier regla global del tema */
+  .image-modal-overlay img#modalImage {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
     will-change: transform;
-    /* Cambiado a 0 0 para controlar las transformaciones de forma precisa en móvil */
-    transform-origin: 0 0;
+    transform-origin: center center !important;
+    display: block !important;
+    box-shadow: none !important;
   }
 
   .image-modal-close {
@@ -141,29 +152,17 @@
     let isMouseDragging = false;
     let initialPinchDistance = null;
     let initialScale = 1;
-    let pinchCenter = { x: 0, y: 0 };
-
-    function centerImage() {
-      // Centra la imagen considerando transform-origin: 0 0
-      const rect = modalImg.getBoundingClientRect();
-      const imgWidth = modalImg.offsetWidth * scale;
-      const imgHeight = modalImg.offsetHeight * scale;
-      pointX = (window.innerWidth - imgWidth) / 2;
-      pointY = (window.innerHeight - imgHeight) / 2;
-    }
 
     function updateTransform() {
-      modalImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+      modalImg.style.transform = `translate3d(${pointX}px, ${pointY}px, 0px) scale(${scale})`;
     }
 
     function resetZoom() {
       scale = 1;
+      pointX = 0;
+      pointY = 0;
       modalImg.style.cursor = 'zoom-in';
-      // Esperar un frame a que se carguen las dimensiones reales
-      requestAnimationFrame(() => {
-        centerImage();
-        updateTransform();
-      });
+      updateTransform();
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -174,8 +173,8 @@
           e.preventDefault();
           e.stopPropagation();
           modalImg.src = this.src;
-          modal.style.display = 'block';
           resetZoom();
+          modal.style.display = 'block';
         });
       });
     });
@@ -187,6 +186,7 @@
       }
       modal.style.display = 'none';
       modalImg.src = '';
+      resetZoom();
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -205,7 +205,7 @@
     });
 
     // ==========================================
-    // LÓGICA DE PC (RUEDA + ARRASTRE INTACTOS)
+    // LÓGICA DE PC (RUEDA + ARRASTRE CLICK)
     // ==========================================
     container.addEventListener('wheel', function(e) {
       e.preventDefault();
@@ -216,16 +216,15 @@
       if (newScale < 1) newScale = 1;
       if (newScale > 6) newScale = 6;
 
-      // Calcular foco de zoom respecto a la posición del cursor
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
-
-      pointX = mouseX - (mouseX - pointX) * (newScale / scale);
-      pointY = mouseY - (mouseY - pointY) * (newScale / scale);
+      // Ajusta la posición de arrastre según el zoom respecto al centro
+      const ratio = newScale / scale;
+      pointX = (pointX) * ratio;
+      pointY = (pointY) * ratio;
       scale = newScale;
 
       if (scale === 1) { 
-        centerImage();
+        pointX = 0;
+        pointY = 0;
         modalImg.style.cursor = 'zoom-in';
       } else {
         modalImg.style.cursor = 'grab';
@@ -263,7 +262,7 @@
     });
 
     // ==========================================
-    // LÓGICA MÓVIL (ZOOM FLUIDO EN EL PUNTO TÁCTIL)
+    // LÓGICA DE MÓVIL (PINCH OMNIDIRECCIONAL + DRAG)
     // ==========================================
     container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
@@ -277,11 +276,6 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
         initialScale = scale;
-        
-        pinchCenter = {
-          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-        };
       }
     }, { passive: true });
 
@@ -300,22 +294,15 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
 
-        const currentCenter = {
-          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-        };
-
         let newScale = initialScale * (currentDistance / initialPinchDistance);
         if (newScale < 1) newScale = 1;
         if (newScale > 6) newScale = 6;
 
-        // Ajustar el origen del punto X/Y basándose en las coordenadas relativas del pinch
-        pointX = currentCenter.x - (currentCenter.x - pointX) * (newScale / scale);
-        pointY = currentCenter.y - (currentCenter.y - pointY) * (newScale / scale);
         scale = newScale;
 
         if (scale === 1) {
-          centerImage();
+          pointX = 0;
+          pointY = 0;
         }
 
         updateTransform();
