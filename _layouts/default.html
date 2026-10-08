@@ -119,6 +119,57 @@
     position: absolute;
     top: 15px;
     right: 20px;
+    color: #fff;<style>
+  /* Contenedor principal con Flexbox para centrado absoluto */
+  .image-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 999999;
+    touch-action: none;
+  }
+
+  .image-modal-container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+
+  /* Reset absoluto aislado del tema de Jekyll */
+  .image-modal-overlay img#modalImage {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    max-width: 90vw !important;
+    max-height: 90vh !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    will-change: transform;
+    transform-origin: center center !important;
+    display: block !important;
+    box-shadow: none !important;
+  }
+
+  .image-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
     color: #fff;
     font-size: 34px;
     font-weight: bold;
@@ -152,6 +203,7 @@
     let isMouseDragging = false;
     let initialPinchDistance = null;
     let initialScale = 1;
+    let pinchCenter = { x: 0, y: 0 };
 
     function updateTransform() {
       modalImg.style.transform = `translate3d(${pointX}px, ${pointY}px, 0px) scale(${scale})`;
@@ -205,21 +257,24 @@
     });
 
     // ==========================================
-    // LÓGICA DE PC (RUEDA + ARRASTRE CLICK)
+    // LÓGICA DE PC (RUEDA CON ZOOM FOCALIZADO)
     // ==========================================
     container.addEventListener('wheel', function(e) {
       e.preventDefault();
       
       let delta = -e.deltaY;
-      let newScale = delta > 0 ? scale * 1.15 : scale / 1.15;
+      let newScale = delta > 0 ? scale * 1.2 : scale / 1.2;
       
       if (newScale < 1) newScale = 1;
       if (newScale > 6) newScale = 6;
 
-      // Ajusta la posición de arrastre según el zoom respecto al centro
-      const ratio = newScale / scale;
-      pointX = (pointX) * ratio;
-      pointY = (pointY) * ratio;
+      // Calcular la posición del cursor respecto al centro del viewport
+      const mouseX = e.clientX - window.innerWidth / 2;
+      const mouseY = e.clientY - window.innerHeight / 2;
+
+      // Ajustar desplazamiento para enfocar hacia el puntero del mouse
+      pointX = mouseX - (mouseX - pointX) * (newScale / scale);
+      pointY = mouseY - (mouseY - pointY) * (newScale / scale);
       scale = newScale;
 
       if (scale === 1) { 
@@ -262,7 +317,7 @@
     });
 
     // ==========================================
-    // LÓGICA DE MÓVIL (PINCH OMNIDIRECCIONAL + DRAG)
+    // LÓGICA DE MÓVIL (PINCH FOCALIZADO + DRAG)
     // ==========================================
     container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
@@ -276,6 +331,12 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
         initialScale = scale;
+
+        // Calcular el punto medio entre los dos dedos respecto al centro de pantalla
+        pinchCenter = {
+          x: ((e.touches[0].clientX + e.touches[1].clientX) / 2) - (window.innerWidth / 2),
+          y: ((e.touches[0].clientY + e.touches[1].clientY) / 2) - (window.innerHeight / 2)
+        };
       }
     }, { passive: true });
 
@@ -298,6 +359,9 @@
         if (newScale < 1) newScale = 1;
         if (newScale > 6) newScale = 6;
 
+        // Ajustar el desplazamiento dinámicamente según el centro de los dedos
+        pointX = pinchCenter.x - (pinchCenter.x - pointX) * (newScale / scale);
+        pointY = pinchCenter.y - (pinchCenter.y - pointY) * (newScale / scale);
         scale = newScale;
 
         if (scale === 1) {
