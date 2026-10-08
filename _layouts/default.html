@@ -157,6 +157,7 @@
         img.style.cursor = 'zoom-in';
         img.addEventListener('click', function(e) {
           e.preventDefault();
+          e.stopPropagation(); // Evita interferencias
           modalImg.src = this.src;
           resetZoom();
           modal.style.display = 'block';
@@ -164,19 +165,36 @@
       });
     });
 
-    closeBtn.addEventListener('click', function() {
+    // Función unificada para cerrar el modal limpiamente
+    function closeModal(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Detiene el clic para que no reabra la imagen
+      }
       modal.style.display = 'none';
       modalImg.src = '';
-    });
+      resetZoom();
+    }
 
+    // Eventos de cierre en la X (para clic y toque directo)
+    closeBtn.addEventListener('click', closeModal);
+    closeBtn.addEventListener('touchstart', closeModal, { passive: false });
+
+    // Evento de cierre haciendo clic fuera de la imagen
     modal.addEventListener('click', function(e) {
       if (e.target === modal || e.target === container) {
-        modal.style.display = 'none';
-        modalImg.src = '';
+        closeModal(e);
       }
     });
 
-    // Zoom con rueda del mouse en PC (Sube / Baja)
+    // Cierre con la tecla ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && modal.style.display === 'block') {
+        closeModal(e);
+      }
+    });
+
+    // Zoom con rueda del mouse en PC
     container.addEventListener('wheel', function(e) {
       e.preventDefault();
       const xs = (e.clientX - window.innerWidth / 2 - pointX) / scale;
