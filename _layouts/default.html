@@ -137,6 +137,7 @@
     let startX = 0;
     let startY = 0;
     let isDragging = false;
+    let isMouseDragging = false; // Estado para arrastrar con mouse en PC
     let initialPinchDistance = null;
     let initialScale = 1;
 
@@ -148,6 +149,7 @@
       scale = 1;
       pointX = 0;
       pointY = 0;
+      modalImg.style.cursor = 'zoom-in';
       updateTransform();
     }
 
@@ -191,7 +193,7 @@
     });
 
     // ==========================================
-    // LÓGICA DE PC (NO SE TOCÓ NADA, QUEDÓ INTACTA)
+    // LÓGICA DE PC (ZOOM CON RUEDA + MÓDULO ARRASTRE)
     // ==========================================
     container.addEventListener('wheel', function(e) {
       e.preventDefault();
@@ -208,12 +210,48 @@
       pointY = (e.clientY - window.innerHeight / 2) - ys * newScale;
       scale = newScale;
 
-      if (scale === 1) { pointX = 0; pointY = 0; }
+      if (scale === 1) { 
+        pointX = 0; 
+        pointY = 0; 
+        modalImg.style.cursor = 'zoom-in';
+      } else {
+        modalImg.style.cursor = 'grab';
+      }
+
       updateTransform();
     }, { passive: false });
 
+    // MÓDULO NUEVO: Arrastrar imagen con clic sostenido en PC
+    modalImg.addEventListener('mousedown', function(e) {
+      if (scale > 1 && e.button === 0) { // Solo si la imagen tiene zoom y es clic izquierdo
+        e.preventDefault();
+        isMouseDragging = true;
+        startX = e.clientX - pointX;
+        startY = e.clientY - pointY;
+        modalImg.style.cursor = 'grabbing';
+      }
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (isMouseDragging && scale > 1) {
+        e.preventDefault();
+        pointX = e.clientX - startX;
+        pointY = e.clientY - startY;
+        updateTransform();
+      }
+    });
+
+    window.addEventListener('mouseup', function() {
+      if (isMouseDragging) {
+        isMouseDragging = false;
+        if (scale > 1) {
+          modalImg.style.cursor = 'grab';
+        }
+      }
+    });
+
     // ==========================================
-    // LÓGICA EXCLUSIVA PARA MÓVIL (AJUSTADA)
+    // LÓGICA EXCLUSIVA PARA MÓVIL (INTACTA)
     // ==========================================
     container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
@@ -231,14 +269,12 @@
     }, { passive: true });
 
     container.addEventListener('touchmove', function(e) {
-      // Arrastrar la imagen libremente con 1 dedo cuando está con zoom
       if (e.touches.length === 1 && isDragging && scale > 1) {
         e.preventDefault();
         pointX = e.touches[0].clientX - startX;
         pointY = e.touches[0].clientY - startY;
         updateTransform();
       } 
-      // Zoom suave con 2 dedos centrado en origen sin desplazamiento hacia arriba
       else if (e.touches.length === 2 && initialPinchDistance) {
         e.preventDefault();
         
@@ -253,7 +289,6 @@
 
         scale = newScale;
 
-        // Si vuelve a 1x, resetea centrado
         if (scale === 1) {
           pointX = 0;
           pointY = 0;
