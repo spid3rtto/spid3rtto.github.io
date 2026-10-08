@@ -78,7 +78,7 @@
     height: 100vh;
     background: rgba(0, 0, 0, 0.92);
     z-index: 999999;
-    touch-action: none; /* Bloquea el scroll de la página en móvil */
+    touch-action: none;
   }
 
   .image-modal-container {
@@ -100,7 +100,8 @@
     user-select: none;
     -webkit-user-drag: none;
     will-change: transform;
-    transform-origin: center center;
+    /* Cambiado a 0 0 para controlar las transformaciones de forma precisa en móvil */
+    transform-origin: 0 0;
   }
 
   .image-modal-close {
@@ -140,6 +141,16 @@
     let isMouseDragging = false;
     let initialPinchDistance = null;
     let initialScale = 1;
+    let pinchCenter = { x: 0, y: 0 };
+
+    function centerImage() {
+      // Centra la imagen considerando transform-origin: 0 0
+      const rect = modalImg.getBoundingClientRect();
+      const imgWidth = modalImg.offsetWidth * scale;
+      const imgHeight = modalImg.offsetHeight * scale;
+      pointX = (window.innerWidth - imgWidth) / 2;
+      pointY = (window.innerHeight - imgHeight) / 2;
+    }
 
     function updateTransform() {
       modalImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
@@ -147,10 +158,12 @@
 
     function resetZoom() {
       scale = 1;
-      pointX = 0;
-      pointY = 0;
       modalImg.style.cursor = 'zoom-in';
-      updateTransform();
+      // Esperar un frame a que se carguen las dimensiones reales
+      requestAnimationFrame(() => {
+        centerImage();
+        updateTransform();
+      });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -161,8 +174,8 @@
           e.preventDefault();
           e.stopPropagation();
           modalImg.src = this.src;
-          resetZoom();
           modal.style.display = 'block';
+          resetZoom();
         });
       });
     });
@@ -174,7 +187,6 @@
       }
       modal.style.display = 'none';
       modalImg.src = '';
-      resetZoom();
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -193,12 +205,10 @@
     });
 
     // ==========================================
-    // LÓGICA DE PC (ZOOM RUEDA + ARRASTRE CON CLIC)
+    // LÓGICA DE PC (RUEDA + ARRASTRE INTACTOS)
     // ==========================================
     container.addEventListener('wheel', function(e) {
       e.preventDefault();
-      const xs = (e.clientX - window.innerWidth / 2 - pointX) / scale;
-      const ys = (e.clientY - window.innerHeight / 2 - pointY) / scale;
       
       let delta = -e.deltaY;
       let newScale = delta > 0 ? scale * 1.15 : scale / 1.15;
@@ -206,13 +216,16 @@
       if (newScale < 1) newScale = 1;
       if (newScale > 6) newScale = 6;
 
-      pointX = (e.clientX - window.innerWidth / 2) - xs * newScale;
-      pointY = (e.clientY - window.innerHeight / 2) - ys * newScale;
+      // Calcular foco de zoom respecto a la posición del cursor
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      pointX = mouseX - (mouseX - pointX) * (newScale / scale);
+      pointY = mouseY - (mouseY - pointY) * (newScale / scale);
       scale = newScale;
 
       if (scale === 1) { 
-        pointX = 0; 
-        pointY = 0; 
+        centerImage();
         modalImg.style.cursor = 'zoom-in';
       } else {
         modalImg.style.cursor = 'grab';
@@ -250,7 +263,7 @@
     });
 
     // ==========================================
-    // LÓGICA DE MÓVIL (ZOOM CENTRADO SIN DESVIACIÓN)
+    // LÓGICA MÓVIL (ZOOM FLUIDO EN EL PUNTO TÁCTIL)
     // ==========================================
     container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
@@ -264,18 +277,21 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
         initialScale = scale;
+        
+        pinchCenter = {
+          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+        };
       }
     }, { passive: true });
 
     container.addEventListener('touchmove', function(e) {
-      // Arrastrar con 1 dedo
       if (e.touches.length === 1 && isDragging && scale > 1) {
         e.preventDefault();
         pointX = e.touches[0].clientX - startX;
         pointY = e.touches[0].clientY - startY;
         updateTransform();
       } 
-      // Zoom con 2 dedos centrado geométricamente
       else if (e.touches.length === 2 && initialPinchDistance) {
         e.preventDefault();
         
@@ -284,16 +300,22 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
 
+        const currentCenter = {
+          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+        };
+
         let newScale = initialScale * (currentDistance / initialPinchDistance);
         if (newScale < 1) newScale = 1;
         if (newScale > 6) newScale = 6;
 
+        // Ajustar el origen del punto X/Y basándose en las coordenadas relativas del pinch
+        pointX = currentCenter.x - (currentCenter.x - pointX) * (newScale / scale);
+        pointY = currentCenter.y - (currentCenter.y - pointY) * (newScale / scale);
         scale = newScale;
 
-        // Si vuelve al tamaño normal, centrar perfectamente
         if (scale === 1) {
-          pointX = 0;
-          pointY = 0;
+          centerImage();
         }
 
         updateTransform();
