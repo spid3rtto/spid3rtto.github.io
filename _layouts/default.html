@@ -140,7 +140,6 @@
     let isMouseDragging = false;
     let initialPinchDistance = null;
     let initialScale = 1;
-    let pinchCenter = { x: 0, y: 0 };
 
     function updateTransform() {
       modalImg.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
@@ -194,7 +193,7 @@
     });
 
     // ==========================================
-    // LÓGICA DE PC (ZOOM CON RUEDA + ARRASTRE CLICK)
+    // LÓGICA DE PC (ZOOM RUEDA + ARRASTRE CON CLIC)
     // ==========================================
     container.addEventListener('wheel', function(e) {
       e.preventDefault();
@@ -251,7 +250,7 @@
     });
 
     // ==========================================
-    // LÓGICA MÓVIL (ZOOM OMNIDIRECCIONAL Y ARRASTRE)
+    // LÓGICA DE MÓVIL (ZOOM CENTRADO SIN DESVIACIÓN)
     // ==========================================
     container.addEventListener('touchstart', function(e) {
       if (e.touches.length === 1) {
@@ -265,21 +264,18 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
         initialScale = scale;
-        
-        pinchCenter = {
-          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-        };
       }
     }, { passive: true });
 
     container.addEventListener('touchmove', function(e) {
+      // Arrastrar con 1 dedo
       if (e.touches.length === 1 && isDragging && scale > 1) {
         e.preventDefault();
         pointX = e.touches[0].clientX - startX;
         pointY = e.touches[0].clientY - startY;
         updateTransform();
       } 
+      // Zoom con 2 dedos centrado geométricamente
       else if (e.touches.length === 2 && initialPinchDistance) {
         e.preventDefault();
         
@@ -288,28 +284,18 @@
           e.touches[0].clientY - e.touches[1].clientY
         );
 
-        const currentCenter = {
-          x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-          y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-        };
-
         let newScale = initialScale * (currentDistance / initialPinchDistance);
         if (newScale < 1) newScale = 1;
         if (newScale > 6) newScale = 6;
 
-        // Calcula el desplazamiento dinámico en X e Y respecto al centro de los dedos
-        const xs = (pinchCenter.x - window.innerWidth / 2 - pointX) / scale;
-        const ys = (pinchCenter.y - window.innerHeight / 2 - pointY) / scale;
-
-        pointX = (currentCenter.x - window.innerWidth / 2) - xs * newScale;
-        pointY = (currentCenter.y - window.innerHeight / 2) - ys * newScale;
         scale = newScale;
 
+        // Si vuelve al tamaño normal, centrar perfectamente
         if (scale === 1) {
           pointX = 0;
           pointY = 0;
         }
-        
+
         updateTransform();
       }
     }, { passive: false });
