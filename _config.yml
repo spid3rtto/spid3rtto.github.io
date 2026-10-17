@@ -80,3 +80,5 @@ exclude:
   - LICENSE
   - README.md
   - CNAME
+include:
+  - google624fe70651620eba.html
