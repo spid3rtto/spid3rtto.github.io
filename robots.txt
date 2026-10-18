@@ -1,4 +1,3 @@
 User-agent: *
-Disallow:
-
+Disallow: /sitemap_new.xml
 Sitemap: https://spid3rtto.github.io/sitemap.xml
