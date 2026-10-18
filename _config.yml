@@ -46,7 +46,7 @@ baseurl: ""
 # Use the following plug-ins (Jekyll 3+)
 plugins:
   - jekyll-feed
-
+  - jekyll-sitemap
 #
 # !! You don't need to change any of the configuration flags below !!
 #
