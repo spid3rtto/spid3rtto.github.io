@@ -45,7 +45,6 @@ baseurl: ""
 
 # Use the following plug-ins (Jekyll 3+)
 plugins:
-  - jekyll-sitemap
   - jekyll-feed
 
 #
