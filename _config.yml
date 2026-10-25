@@ -47,6 +47,7 @@ baseurl: ""
 plugins:
   - jekyll-feed
   - jekyll-sitemap
+  - jekyll-seo-tag
 #
 # !! You don't need to change any of the configuration flags below !!
 #
