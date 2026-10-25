@@ -40,7 +40,7 @@ google_analytics:
 
 # Your website URL
 # Used for Sitemap.xml and your RSS feed
-url: "https://spid3rtto.github.io"
+url: "https://spid3rtto.github.io/"
 baseurl: ""
 
 # Use the following plug-ins (Jekyll 3+)
