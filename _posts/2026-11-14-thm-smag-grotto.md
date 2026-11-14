@@ -15,6 +15,7 @@ First, we will determine whether we have a connection to the target machine.
 ![](/images/ping.png)
 
 As we can see, we sent an ICMP trace and received it back; this means we have a connection to the machine.
+
 We will begin scanning the ports using nmap to identify exposed services, with the following command:
 
 ```bash
@@ -24,20 +25,22 @@ sudo nmap -n --min-rate 5000 -p- -sS --open -Pn -vvv 10.66.128.160
 ![](/images/scan.png)
 
 As we can see, only ports 22 and 80 are open.
+
 Now that the ports have been scanned, we will perform an exhaustive scan to determine their versions using:
 
 ```bash
 nmap -n --min-rate 5000 -p22,80 -sCV 10.66.128.160 -oN target
 ```
-
-![](/images/scan_version.png)
-
 As we can see, there is nothing of interest here, so let’s take a look at how the HTTP service is implemented.
+
 Upon entering, we observe the following:
 
 ![](/images/scan_version.png)
 
 Upon opening the page, we are greeted by the following: Welcome to Smag!
+
+![](/images/page_web.png)
+
 The first thing that came to mind was to do a:
 
 Ctrl + U
@@ -47,12 +50,26 @@ To inspect the page and see if there was anything in the comments that might pro
 ![](/images/inspection_web.png)
 
 Well, there wasn't anything interesting; even though there was a CSS file, I checked it, but there’s nothing there—it’s just for the page's decoration.
+
 The next step we’ll take is fuzzing, which helps us discover directories that aren’t visible at first glance.
+
 We will use the tool wfuzz, which is perfect for our needs.
 
 ```bash
 wfuzz -c --hc=404 -w /usr/share/seclists/Discovery/Web-Content/DirBuster-2007_directory-list-2.3-medium.txt -t 200 http://10.66.128.160/FUZZ
 ```
+![](/images/inspection_web.png)
 
+Once the fuzzing was complete, we only discovered one directory: mail.
+
+![](/images/fuzzing.png)
+
+We will access that directory via the URL.
+
+![](/images/directory_mail.png)
+
+It appears the employees have run into a network issue, and they have also provided us with a pcap file.
+
+We will download it and analyze it.
 <!--more-->
 
