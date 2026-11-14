@@ -32,20 +32,31 @@
         box-sizing: border-box !important;
       }
 
-      /* Permite que el contenedor interno ocupe todo el ancho disponible de la tarjeta */
+      /* Fuerza a que el contenido interno use Flexbox para centrar elementos */
       .posts > .post .entry,
-      .posts > .post p {
+      article.post .entry {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
         width: 100% !important;
-        box-sizing: border-box !important;
       }
 
-      /* Centra la imagen horizontalmente y mantiene sus proporciones reales */
-      .posts > .post img, article.post img {
+      /* Si la imagen está envuelta en un párrafo <p>, mantiene el texto a la izquierda */
+      .posts > .post .entry p,
+      article.post .entry p {
+        width: 100% !important;
+        text-align: left;
+      }
+
+      /* Centra la imagen horizontalmente sin importar sus proporciones */
+      .posts > .post img,
+      article.post img {
         display: block !important;
-        width: auto;
-        height: auto;
-        max-width: 100%;
-        margin: 15px auto !important;
+        align-self: center !important;
+        margin: 12px auto !important;
+        width: auto !important;
+        height: auto !important;
+        max-width: 100% !important;
         border-radius: 4px;
       }
     </style>
