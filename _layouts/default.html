@@ -17,6 +17,29 @@
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
 
+    <!-- Ajuste dinámico para compactar tarjetas según el tamaño de la imagen -->
+    <style>
+      .posts, #main {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .posts > .post, article.post {
+        display: inline-block !important;
+        width: fit-content !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .posts > .post img, article.post img {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+      }
+    </style>
+
     <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
   </head>
 
@@ -58,332 +81,270 @@
 
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        // Detecta si es pantalla móvil para ajustar márgenes
         const isMobile = window.innerWidth <= 768;
 
         mediumZoom('.post img, article img, .posts img', {
-          margin: isMobile ? 0 : 24,          // En móvil la imagen ocupa el 100% del ancho
-          background: 'rgba(0, 0, 0, 0.95)',  // Fondo oscuro para resaltar detalles
+          margin: isMobile ? 0 : 24,
+          background: 'rgba(0, 0, 0, 0.95)',
           scrollOffset: 40
         });
       });
     </script>
-    
-  </body>
-</html>
 
-<style>
-  /* Contenedor principal con Flexbox para centrado absoluto perfecto */
-  .image-modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.92);
-    z-index: 999999;
-    touch-action: none;
-  }
-
-  .image-modal-container {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    position: relative !important;
-  }
-
-  /* Reset absoluto para aislar la imagen de cualquier regla global del tema */
-  .image-modal-overlay img#modalImage {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    max-width: 90vw !important;
-    max-height: 90vh !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    user-select: none !important;
-    -webkit-user-drag: none !important;
-    will-change: transform;
-    transform-origin: center center !important;
-    display: block !important;
-    box-shadow: none !important;
-  }
-
-  .image-modal-close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    color: #fff;<style>
-  /* Contenedor principal con Flexbox para centrado absoluto */
-  .image-modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.92);
-    z-index: 999999;
-    touch-action: none;
-  }
-
-  .image-modal-container {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    position: relative !important;
-  }
-
-  /* Reset absoluto aislado del tema de Jekyll */
-  .image-modal-overlay img#modalImage {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    right: auto !important;
-    bottom: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    max-width: 90vw !important;
-    max-height: 90vh !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    user-select: none !important;
-    -webkit-user-drag: none !important;
-    will-change: transform;
-    transform-origin: center center !important;
-    display: block !important;
-    box-shadow: none !important;
-  }
-
-  .image-modal-close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    color: #fff;
-    font-size: 34px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 1000000;
-    font-family: monospace;
-    padding: 10px;
-  }
-</style>
-
-<div id="imageModal" class="image-modal-overlay">
-  <span class="image-modal-close" id="modalClose">&times;</span>
-  <div class="image-modal-container" id="modalContainer">
-    <img id="modalImage" src="" alt="Zoom Image">
-  </div>
-</div>
-
-<script>
-  (function() {
-    const modal = document.getElementById('imageModal');
-    const modalImg = document.getElementById('modalImage');
-    const closeBtn = document.getElementById('modalClose');
-    const container = document.getElementById('modalContainer');
-
-    let scale = 1;
-    let pointX = 0;
-    let pointY = 0;
-    let startX = 0;
-    let startY = 0;
-    let isDragging = false;
-    let isMouseDragging = false;
-    let initialPinchDistance = null;
-    let initialScale = 1;
-    let pinchCenter = { x: 0, y: 0 };
-
-    function updateTransform() {
-      modalImg.style.transform = `translate3d(${pointX}px, ${pointY}px, 0px) scale(${scale})`;
-    }
-
-    function resetZoom() {
-      scale = 1;
-      pointX = 0;
-      pointY = 0;
-      modalImg.style.cursor = 'zoom-in';
-      updateTransform();
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const postImages = document.querySelectorAll('.post img, article img, .posts img');
-      postImages.forEach(img => {
-        img.style.cursor = 'zoom-in';
-        img.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          modalImg.src = this.src;
-          resetZoom();
-          modal.style.display = 'block';
-        });
-      });
-    });
-
-    function closeModal(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      modal.style.display = 'none';
-      modalImg.src = '';
-      resetZoom();
-    }
-
-    closeBtn.addEventListener('click', closeModal);
-    closeBtn.addEventListener('touchstart', closeModal, { passive: false });
-
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal || e.target === container) {
-        closeModal(e);
-      }
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && modal.style.display === 'block') {
-        closeModal(e);
-      }
-    });
-
-    // ==========================================
-    // LÓGICA DE PC (RUEDA CON ZOOM FOCALIZADO)
-    // ==========================================
-    container.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      
-      let delta = -e.deltaY;
-      let newScale = delta > 0 ? scale * 1.2 : scale / 1.2;
-      
-      if (newScale < 1) newScale = 1;
-      if (newScale > 6) newScale = 6;
-
-      // Calcular la posición del cursor respecto al centro del viewport
-      const mouseX = e.clientX - window.innerWidth / 2;
-      const mouseY = e.clientY - window.innerHeight / 2;
-
-      // Ajustar desplazamiento para enfocar hacia el puntero del mouse
-      pointX = mouseX - (mouseX - pointX) * (newScale / scale);
-      pointY = mouseY - (mouseY - pointY) * (newScale / scale);
-      scale = newScale;
-
-      if (scale === 1) { 
-        pointX = 0;
-        pointY = 0;
-        modalImg.style.cursor = 'zoom-in';
-      } else {
-        modalImg.style.cursor = 'grab';
+    <!-- Estilos y Modal de Zoom Personalizado -->
+    <style>
+      .image-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.92);
+        z-index: 999999;
+        touch-action: none;
       }
 
-      updateTransform();
-    }, { passive: false });
-
-    modalImg.addEventListener('mousedown', function(e) {
-      if (scale > 1 && e.button === 0) {
-        e.preventDefault();
-        isMouseDragging = true;
-        startX = e.clientX - pointX;
-        startY = e.clientY - pointY;
-        modalImg.style.cursor = 'grabbing';
+      .image-modal-container {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+        position: relative !important;
       }
-    });
 
-    window.addEventListener('mousemove', function(e) {
-      if (isMouseDragging && scale > 1) {
-        e.preventDefault();
-        pointX = e.clientX - startX;
-        pointY = e.clientY - startY;
-        updateTransform();
+      .image-modal-overlay img#modalImage {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        bottom: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        max-width: 90vw !important;
+        max-height: 90vh !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain !important;
+        user-select: none !important;
+        -webkit-user-drag: none !important;
+        will-change: transform;
+        transform-origin: center center !important;
+        display: block !important;
+        box-shadow: none !important;
       }
-    });
 
-    window.addEventListener('mouseup', function() {
-      if (isMouseDragging) {
-        isMouseDragging = false;
-        if (scale > 1) {
-          modalImg.style.cursor = 'grab';
+      .image-modal-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        color: #fff;
+        font-size: 34px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000000;
+        font-family: monospace;
+        padding: 10px;
+      }
+    </style>
+
+    <div id="imageModal" class="image-modal-overlay">
+      <span class="image-modal-close" id="modalClose">&times;</span>
+      <div class="image-modal-container" id="modalContainer">
+        <img id="modalImage" src="" alt="Zoom Image">
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const closeBtn = document.getElementById('modalClose');
+        const container = document.getElementById('modalContainer');
+
+        let scale = 1;
+        let pointX = 0;
+        let pointY = 0;
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+        let isMouseDragging = false;
+        let initialPinchDistance = null;
+        let initialScale = 1;
+        let pinchCenter = { x: 0, y: 0 };
+
+        function updateTransform() {
+          modalImg.style.transform = `translate3d(${pointX}px, ${pointY}px, 0px) scale(${scale})`;
         }
-      }
-    });
 
-    // ==========================================
-    // LÓGICA DE MÓVIL (PINCH FOCALIZADO + DRAG)
-    // ==========================================
-    container.addEventListener('touchstart', function(e) {
-      if (e.touches.length === 1) {
-        isDragging = true;
-        startX = e.touches[0].clientX - pointX;
-        startY = e.touches[0].clientY - pointY;
-      } else if (e.touches.length === 2) {
-        isDragging = false;
-        initialPinchDistance = Math.hypot(
-          e.touches[0].clientX - e.touches[1].clientX,
-          e.touches[0].clientY - e.touches[1].clientY
-        );
-        initialScale = scale;
-
-        // Calcular el punto medio entre los dos dedos respecto al centro de pantalla
-        pinchCenter = {
-          x: ((e.touches[0].clientX + e.touches[1].clientX) / 2) - (window.innerWidth / 2),
-          y: ((e.touches[0].clientY + e.touches[1].clientY) / 2) - (window.innerHeight / 2)
-        };
-      }
-    }, { passive: true });
-
-    container.addEventListener('touchmove', function(e) {
-      if (e.touches.length === 1 && isDragging && scale > 1) {
-        e.preventDefault();
-        pointX = e.touches[0].clientX - startX;
-        pointY = e.touches[0].clientY - startY;
-        updateTransform();
-      } 
-      else if (e.touches.length === 2 && initialPinchDistance) {
-        e.preventDefault();
-        
-        const currentDistance = Math.hypot(
-          e.touches[0].clientX - e.touches[1].clientX,
-          e.touches[0].clientY - e.touches[1].clientY
-        );
-
-        let newScale = initialScale * (currentDistance / initialPinchDistance);
-        if (newScale < 1) newScale = 1;
-        if (newScale > 6) newScale = 6;
-
-        // Ajustar el desplazamiento dinámicamente según el centro de los dedos
-        pointX = pinchCenter.x - (pinchCenter.x - pointX) * (newScale / scale);
-        pointY = pinchCenter.y - (pinchCenter.y - pointY) * (newScale / scale);
-        scale = newScale;
-
-        if (scale === 1) {
+        function resetZoom() {
+          scale = 1;
           pointX = 0;
           pointY = 0;
+          modalImg.style.cursor = 'zoom-in';
+          updateTransform();
         }
 
-        updateTransform();
-      }
-    }, { passive: false });
+        document.addEventListener('DOMContentLoaded', function() {
+          const postImages = document.querySelectorAll('.post img, article img, .posts img');
+          postImages.forEach(img => {
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              modalImg.src = this.src;
+              resetZoom();
+              modal.style.display = 'block';
+            });
+          });
+        });
 
-    container.addEventListener('touchend', function(e) {
-      if (e.touches.length < 2) {
-        initialPinchDistance = null;
-      }
-      if (e.touches.length === 0) {
-        isDragging = false;
-      }
-    });
-  })();
-</script>
+        function closeModal(e) {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          modal.style.display = 'none';
+          modalImg.src = '';
+          resetZoom();
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        closeBtn.addEventListener('touchstart', closeModal, { passive: false });
+
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal || e.target === container) {
+            closeModal(e);
+          }
+        });
+
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && modal.style.display === 'block') {
+            closeModal(e);
+          }
+        });
+
+        // LÓGICA DE PC (RUEDA CON ZOOM FOCALIZADO)
+        container.addEventListener('wheel', function(e) {
+          e.preventDefault();
+          
+          let delta = -e.deltaY;
+          let newScale = delta > 0 ? scale * 1.2 : scale / 1.2;
+          
+          if (newScale < 1) newScale = 1;
+          if (newScale > 6) newScale = 6;
+
+          const mouseX = e.clientX - window.innerWidth / 2;
+          const mouseY = e.clientY - window.innerHeight / 2;
+
+          pointX = mouseX - (mouseX - pointX) * (newScale / scale);
+          pointY = mouseY - (mouseY - pointY) * (newScale / scale);
+          scale = newScale;
+
+          if (scale === 1) { 
+            pointX = 0;
+            pointY = 0;
+            modalImg.style.cursor = 'zoom-in';
+          } else {
+            modalImg.style.cursor = 'grab';
+          }
+
+          updateTransform();
+        }, { passive: false });
+
+        modalImg.addEventListener('mousedown', function(e) {
+          if (scale > 1 && e.button === 0) {
+            e.preventDefault();
+            isMouseDragging = true;
+            startX = e.clientX - pointX;
+            startY = e.clientY - pointY;
+            modalImg.style.cursor = 'grabbing';
+          }
+        });
+
+        window.addEventListener('mousemove', function(e) {
+          if (isMouseDragging && scale > 1) {
+            e.preventDefault();
+            pointX = e.clientX - startX;
+            pointY = e.clientY - startY;
+            updateTransform();
+          }
+        });
+
+        window.addEventListener('mouseup', function() {
+          if (isMouseDragging) {
+            isMouseDragging = false;
+            if (scale > 1) {
+              modalImg.style.cursor = 'grab';
+            }
+          }
+        });
+
+        // LÓGICA DE MÓVIL (PINCH FOCALIZADO + DRAG)
+        container.addEventListener('touchstart', function(e) {
+          if (e.touches.length === 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - pointX;
+            startY = e.touches[0].clientY - pointY;
+          } else if (e.touches.length === 2) {
+            isDragging = false;
+            initialPinchDistance = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialScale = scale;
+
+            pinchCenter = {
+              x: ((e.touches[0].clientX + e.touches[1].clientX) / 2) - (window.innerWidth / 2),
+              y: ((e.touches[0].clientY + e.touches[1].clientY) / 2) - (window.innerHeight / 2)
+            };
+          }
+        }, { passive: true });
+
+        container.addEventListener('touchmove', function(e) {
+          if (e.touches.length === 1 && isDragging && scale > 1) {
+            e.preventDefault();
+            pointX = e.touches[0].clientX - startX;
+            pointY = e.touches[0].clientY - startY;
+            updateTransform();
+          } 
+          else if (e.touches.length === 2 && initialPinchDistance) {
+            e.preventDefault();
+            
+            const currentDistance = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+
+            let newScale = initialScale * (currentDistance / initialPinchDistance);
+            if (newScale < 1) newScale = 1;
+            if (newScale > 6) newScale = 6;
+
+            pointX = pinchCenter.x - (pinchCenter.x - pointX) * (newScale / scale);
+            pointY = pinchCenter.y - (pinchCenter.y - pointY) * (newScale / scale);
+            scale = newScale;
+
+            if (scale === 1) {
+              pointX = 0;
+              pointY = 0;
+            }
+
+            updateTransform();
+          }
+        }, { passive: false });
+
+        container.addEventListener('touchend', function(e) {
+          if (e.touches.length < 2) {
+            initialPinchDistance = null;
+          }
+          if (e.touches.length === 0) {
+            isDragging = false;
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>
