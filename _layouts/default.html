@@ -17,7 +17,7 @@
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
 
-    <!-- Ajuste dinámico para compactar tarjetas según el tamaño de la imagen -->
+    <!-- Ajuste dinámico para compactar tarjetas y centrar imágenes -->
     <style>
       .posts, #main {
         display: flex;
@@ -32,11 +32,21 @@
         box-sizing: border-box !important;
       }
 
+      /* Permite que el contenedor interno ocupe todo el ancho disponible de la tarjeta */
+      .posts > .post .entry,
+      .posts > .post p {
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Centra la imagen horizontalmente y mantiene sus proporciones reales */
       .posts > .post img, article.post img {
-        display: block;
+        display: block !important;
         width: auto;
         height: auto;
         max-width: 100%;
+        margin: 15px auto !important;
+        border-radius: 4px;
       }
     </style>
 
