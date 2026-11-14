@@ -27,7 +27,7 @@
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
 
-    <!-- Ajuste dinámico de tarjetas, imágenes y sistema de Modo Oscuro / Claro -->
+    <!-- Ajuste dinámico de tarjetas, imágenes, Modo Oscuro/Claro y Traductor -->
     <style>
       :root {
         color-scheme: dark;
@@ -62,6 +62,8 @@
       html, body {
         background-color: var(--bg-main) !important;
         color: var(--text-main) !important;
+        top: 0px !important;
+        position: static !important;
         transition: background-color 0.2s ease, color 0.2s ease;
       }
 
@@ -146,31 +148,74 @@
         border-color: var(--border-subtle) !important;
       }
 
-      /* Estilo del botón de cambio de tema en la barra superior */
+      /* Botones de Idioma (EN / ES) y Tema en la barra superior */
+      #lang-toggle,
       #theme-toggle {
         background: transparent;
         border: 1px solid var(--border-accent);
         color: var(--text-heading);
         border-radius: 6px;
         padding: 5px 8px;
-        margin-left: 18px;
+        margin-left: 12px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         vertical-align: middle;
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 1;
         transition: background-color 0.2s ease, transform 0.15s ease;
       }
 
+      #lang-toggle {
+        margin-left: 18px;
+        gap: 4px;
+        padding: 6px 9px;
+      }
+
+      #lang-toggle:hover,
       #theme-toggle:hover {
         background-color: rgba(138, 124, 99, 0.18);
         transform: scale(1.05);
       }
 
+      #lang-toggle .lang-opt {
+        color: var(--text-muted);
+        font-weight: normal;
+        transition: color 0.2s ease;
+      }
+
+      #lang-toggle .lang-opt.active {
+        color: #8a7c63;
+        font-weight: bold;
+      }
+
+      #lang-toggle .lang-sep {
+        color: var(--border-subtle);
+      }
+
       #theme-toggle svg {
-        width: 16px;
-        height: 16px;
+        width: 15px;
+        height: 15px;
         display: block;
+      }
+
+      /* Oculta por completo la barra superior y popups de Google Translate */
+      .goog-te-banner-frame.skiptranslate,
+      .goog-te-gadget-icon,
+      #goog-gt-tt,
+      .goog-te-balloon-frame,
+      .VIpgJd-ZVi9od-ORHb-OEVmcd,
+      .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+      .VIpgJd-ZVi9od-l4eHX-hSRGPd,
+      iframe.skiptranslate {
+        display: none !important;
+      }
+
+      .goog-text-highlight {
+        background-color: transparent !important;
+        box-shadow: none !important;
       }
 
       /* Compacta tarjetas SOLO en la portada (.posts) y mantiene ancho normal en el post */
@@ -242,6 +287,11 @@
           <nav>
             <a href="{{ site.baseurl }}/">Blog</a>
             <a href="{{ site.baseurl }}/about">About</a>
+            <button id="lang-toggle" class="notranslate" type="button" aria-label="Cambiar idioma EN / ES" title="Switch language (EN / ES)">
+              <span id="lang-en" class="lang-opt active">EN</span>
+              <span class="lang-sep">/</span>
+              <span id="lang-es" class="lang-opt">ES</span>
+            </button>
             <button id="theme-toggle" type="button" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
               <!-- El icono se actualiza automáticamente vía JS -->
             </button>
@@ -262,7 +312,93 @@
       </div>
     </div>
 
+    <!-- Contenedor oculto para el motor de Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+
     {% include analytics.html %}
+
+    <!-- Lógica del Traductor EN / ES -->
+    <script>
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,es',
+          autoDisplay: false
+        }, 'google_translate_element');
+      }
+
+      (function() {
+        const langBtn = document.getElementById('lang-toggle');
+        const langEn = document.getElementById('lang-en');
+        const langEs = document.getElementById('lang-es');
+
+        // Protege bloques de código para que no se traduzcan comandos ni payloads
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('pre, code, .highlight').forEach(function(el) {
+            el.classList.add('notranslate');
+          });
+        });
+
+        function getCurrentLang() {
+          const match = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/(es|en)/);
+          if (match) return match[1];
+          return localStorage.getItem('site_lang') || 'en';
+        }
+
+        function updateLangUI(lang) {
+          if (lang === 'es') {
+            langEs.classList.add('active');
+            langEn.classList.remove('active');
+            langBtn.title = 'Switch to English';
+          } else {
+            langEn.classList.add('active');
+            langEs.classList.remove('active');
+            langBtn.title = 'Traducir a Español';
+          }
+        }
+
+        function setGoogTransCookie(lang) {
+          const domain = window.location.hostname;
+          if (lang === 'es') {
+            document.cookie = 'googtrans=/en/es; path=/';
+            document.cookie = 'googtrans=/en/es; path=/; domain=' + domain;
+          } else {
+            document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain;
+            document.cookie = 'googtrans=/en/en; path=/';
+          }
+        }
+
+        function triggerTranslation(targetLang) {
+          localStorage.setItem('site_lang', targetLang);
+          setGoogTransCookie(targetLang);
+          updateLangUI(targetLang);
+
+          const select = document.querySelector('select.goog-te-combo');
+          if (select) {
+            select.value = targetLang;
+            select.dispatchEvent(new Event('change'));
+          } else {
+            window.location.reload();
+          }
+        }
+
+        updateLangUI(getCurrentLang());
+
+        window.addEventListener('pageshow', function() {
+          updateLangUI(getCurrentLang());
+        });
+
+        if (langBtn) {
+          langBtn.addEventListener('click', function() {
+            const current = getCurrentLang();
+            const next = current === 'es' ? 'en' : 'es';
+            triggerTranslation(next);
+          });
+        }
+      })();
+    </script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <!-- Lógica del botón Modo Oscuro / Claro con soporte para navegación en caché -->
     <script>
@@ -286,15 +422,12 @@
           }
         }
 
-        // Aplica el tema al cargar
         applyTheme(localStorage.getItem('theme') || 'dark');
 
-        // Reaplica el tema al navegar hacia adelante/atrás desde caché (bfcache)
         window.addEventListener('pageshow', function() {
           applyTheme(localStorage.getItem('theme') || 'dark');
         });
 
-        // Sincroniza si se cambia en otra pestaña
         window.addEventListener('storage', function(e) {
           if (e.key === 'theme') {
             applyTheme(e.newValue || 'dark');
