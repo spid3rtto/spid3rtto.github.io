@@ -17,23 +17,23 @@
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
 
-    <!-- Ajuste dinámico para compactar tarjetas y centrar imágenes -->
+    <!-- Compacta tarjetas SOLO en la portada (.posts) y mantiene el ancho normal al abrir el post -->
     <style>
-      .posts, #main {
+      .posts {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        width: 100%;
       }
 
-      .posts > .post, article.post {
+      .posts > .post {
         display: inline-block !important;
         width: fit-content !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
       }
 
-      .posts > .post .entry,
-      article.post .entry {
+      .posts > .post .entry {
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
@@ -41,25 +41,20 @@
         box-sizing: border-box !important;
       }
 
-      .posts > .post .entry p,
-      article.post .entry p {
+      .posts > .post .entry p {
         width: 100% !important;
         text-align: left !important;
         box-sizing: border-box !important;
       }
 
-      /* Apila el texto arriba y la imagen abajo en columna para no ensanchar la tarjeta */
-      .posts > .post .entry p:has(img),
-      article.post .entry p:has(img) {
+      .posts > .post .entry p:has(img) {
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
         text-align: left !important;
       }
 
-      /* Centra la imagen horizontalmente debajo del texto */
-      .posts > .post img,
-      article.post img {
+      .posts > .post img {
         display: block !important;
         align-self: center !important;
         width: auto !important;
@@ -67,6 +62,12 @@
         max-width: 100% !important;
         margin: 14px auto 4px auto !important;
         border-radius: 4px;
+      }
+
+      /* Restaura las proporciones normales al abrir el post completo */
+      #main > article.post {
+        display: block !important;
+        width: 100% !important;
       }
     </style>
 
