@@ -32,31 +32,37 @@
         box-sizing: border-box !important;
       }
 
-      /* Fuerza a que el contenido interno use Flexbox para centrar elementos */
       .posts > .post .entry,
       article.post .entry {
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
         width: 100% !important;
+        box-sizing: border-box !important;
       }
 
-      /* Si la imagen está envuelta en un párrafo <p>, mantiene el texto a la izquierda */
       .posts > .post .entry p,
       article.post .entry p {
         width: 100% !important;
         text-align: left;
+        box-sizing: border-box !important;
       }
 
-      /* Centra la imagen horizontalmente sin importar sus proporciones */
+      .posts > .post .entry p:has(img),
+      article.post .entry p:has(img) {
+        display: flex !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+
       .posts > .post img,
       article.post img {
         display: block !important;
         align-self: center !important;
-        margin: 12px auto !important;
         width: auto !important;
         height: auto !important;
         max-width: 100% !important;
+        margin: 12px auto !important;
         border-radius: 4px;
       }
     </style>
