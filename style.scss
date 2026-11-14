@@ -294,3 +294,27 @@ footer {
 // ... Otherwise it really bloats up the top of the CSS file and makes it difficult to find the start
 @import "highlights";
 @import "svg-icons";
+
+// --- FIX COMPACTAR TARJETAS EN PORTADA ---
+.posts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Evita que Flexbox estire las tarjetas al 100% */
+}
+
+.posts > .post {
+  display: inline-block !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: 20px !important;
+  margin-bottom: 2em !important;
+  border: 1px solid #8a7c63 !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+
+.posts > .post .entry,
+.posts > .post p {
+  width: fit-content;
+  max-width: 100%;
+}
