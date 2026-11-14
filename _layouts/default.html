@@ -43,7 +43,7 @@
       }
 
       html[data-theme="light"] {
-        --bg-main: #f5f6f8;
+        --bg-main: #f4f5f7;
         --bg-card: #ffffff;
         --bg-footer: #eaeef2;
         --bg-code: #eef1f5;
@@ -55,15 +55,47 @@
         --link-color: #0969da;
       }
 
-      /* Aplicación de colores según el tema activo */
-      body {
+      /* Fondos globales y de tarjetas */
+      html, body {
         background-color: var(--bg-main) !important;
         color: var(--text-main) !important;
         transition: background-color 0.2s ease, color 0.2s ease;
       }
 
+      .posts > .post,
+      #main > article.post {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-accent) !important;
+        color: var(--text-main) !important;
+        transition: background-color 0.2s ease;
+      }
+
+      html[data-theme="light"] .posts > .post,
+      html[data-theme="light"] #main > article.post {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Textos generales dentro de los posts y tarjetas (pisa los colores fijos de style.css) */
+      #main p,
+      #main li,
+      #main strong,
+      #main b,
+      #main em,
+      #main span,
+      #main td,
+      #main th,
+      #main blockquote,
+      .post .entry,
+      article.post .entry {
+        color: var(--text-main) !important;
+      }
+
+      /* Títulos principales y subtítulos */
       h1, h2, h3, h4, h5, h6,
-      h1 a, h2 a, .site-name a {
+      h1 a, h2 a,
+      .site-name a,
+      .post h1, .post h2, .post h3, .post h4,
+      article.post h1, article.post h2, article.post h3, article.post h4 {
         color: var(--text-heading) !important;
       }
 
@@ -88,23 +120,17 @@
         border-top: 1px solid var(--border-subtle) !important;
       }
 
-      .posts > .post {
-        background-color: var(--bg-card) !important;
-        border-color: var(--border-accent) !important;
-        transition: background-color 0.2s ease;
+      /* Adapta la caja [+] TARGET SUMMARY manteniendo su acento dorado/marrón */
+      [style*="color: #8a7c63"] {
+        color: #8a7c63 !important;
       }
 
-      html[data-theme="light"] .posts > .post {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      }
-
-      /* Adapta también la caja [+] TARGET SUMMARY en modo claro */
       html[data-theme="light"] [style*="rgba(255, 255, 255, 0.03)"] {
-        background: #ffffff !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        background: #f9fafb !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
       }
 
-      .entry a, .read-more {
+      .entry a, .read-more, article.post a {
         color: var(--link-color) !important;
       }
 
