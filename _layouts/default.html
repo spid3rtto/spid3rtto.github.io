@@ -373,9 +373,9 @@
         const mouse = { x: null, y: null, radius: 170 };
 
         function getTargetNodeCount() {
-          if (width <= 768) return 20;
-          let count = Math.floor((width * height) / 20000);
-          return Math.max(35, Math.min(80, count));
+          if (width <= 768) return 22;
+          let count = Math.floor((width * height) / 19000);
+          return Math.max(38, Math.min(85, count));
         }
 
         function initNodes() {
@@ -387,7 +387,7 @@
               y: Math.random() * height,
               vx: (Math.random() - 0.5) * 0.45,
               vy: (Math.random() - 0.5) * 0.45,
-              r: Math.random() * 1.8 + 1.3
+              r: Math.random() * 1.8 + 1.4
             });
           }
         }
@@ -412,8 +412,9 @@
           ctx.clearRect(0, 0, width, height);
 
           const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-          const dotColor = isLight ? 'rgba(138, 124, 99, 0.35)' : 'rgba(138, 124, 99, 0.48)';
-          const maxDist = width <= 768 ? 110 : 145;
+          const rgb = isLight ? '88, 77, 58' : '138, 124, 99';
+          const dotColor = isLight ? 'rgba(88, 77, 58, 0.72)' : 'rgba(138, 124, 99, 0.48)';
+          const maxDist = width <= 768 ? 115 : 150;
 
           for (let i = 0; i < nodes.length; i++) {
             const n = nodes[i];
@@ -424,7 +425,7 @@
             if (n.y < 0 || n.y > height) n.vy *= -1;
 
             ctx.beginPath();
-            ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+            ctx.arc(n.x, n.y, isLight ? n.r + 0.3 : n.r, 0, Math.PI * 2);
             ctx.fillStyle = dotColor;
             ctx.fill();
           }
@@ -435,12 +436,12 @@
               const n2 = nodes[j];
               const dist = Math.hypot(n1.x - n2.x, n1.y - n2.y);
               if (dist < maxDist) {
-                const alpha = (1 - dist / maxDist) * (isLight ? 0.24 : 0.34);
+                const alpha = (1 - dist / maxDist) * (isLight ? 0.50 : 0.34);
                 ctx.beginPath();
                 ctx.moveTo(n1.x, n1.y);
                 ctx.lineTo(n2.x, n2.y);
-                ctx.strokeStyle = 'rgba(138, 124, 99, ' + alpha.toFixed(3) + ')';
-                ctx.lineWidth = 0.85;
+                ctx.strokeStyle = 'rgba(' + rgb + ', ' + alpha.toFixed(3) + ')';
+                ctx.lineWidth = isLight ? 1.05 : 0.85;
                 ctx.stroke();
               }
             }
@@ -448,12 +449,12 @@
             if (mouse.x !== null) {
               const mDist = Math.hypot(n1.x - mouse.x, n1.y - mouse.y);
               if (mDist < mouse.radius) {
-                const alpha = (1 - mDist / mouse.radius) * (isLight ? 0.35 : 0.48);
+                const alpha = (1 - mDist / mouse.radius) * (isLight ? 0.68 : 0.48);
                 ctx.beginPath();
                 ctx.moveTo(n1.x, n1.y);
                 ctx.lineTo(mouse.x, mouse.y);
-                ctx.strokeStyle = 'rgba(138, 124, 99, ' + alpha.toFixed(3) + ')';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(' + rgb + ', ' + alpha.toFixed(3) + ')';
+                ctx.lineWidth = isLight ? 1.25 : 1;
                 ctx.stroke();
               }
             }
