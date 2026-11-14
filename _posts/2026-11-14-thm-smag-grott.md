@@ -1,8 +1,12 @@
 ---
 layout: post
-title: Writeup THM Smag grotto
+title: "Writeup THM Smag grotto"
+cover: /images/smile-thm.jpeg
+platform: TryHackMe
+machine: Smag Grotto
+os: Linux
+difficulty: Easy
 ---
 In this post, we will work on the THM machine "Smag Grotto."
-![_config.yml]({{ site.baseurl }}/images/smile-thm.jpeg)
 <!--more-->
 
