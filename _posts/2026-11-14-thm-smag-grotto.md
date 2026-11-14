@@ -58,7 +58,6 @@ We will use the tool wfuzz, which is perfect for our needs.
 ```bash
 wfuzz -c --hc=404 -w /usr/share/seclists/Discovery/Web-Content/DirBuster-2007_directory-list-2.3-medium.txt -t 200 http://10.66.128.160/FUZZ
 ```
-![](/images/inspection_web.png)
 
 Once the fuzzing was complete, we only discovered one directory: mail.
 
@@ -71,5 +70,30 @@ We will access that directory via the URL.
 It appears the employees have run into a network issue, and they have also provided us with a pcap file.
 
 We will download it and analyze it.
+
+We will open Wireshark to analyze the pcap.
+
+```bash
+sudo wireshark dHJhY2Uy.pcap
+```
+
+Upon opening the pcap, we can see all the requests that have been made.
+
+![](/images/wireshark.png)
+
+The ones we are interested in are the HTTP protocols.
+
+Since HTTP services do not encrypt the data sent to the server, it can be viewed in clear text.
+
+![](/images/data.png)
+
+We can see that we have a subdomain, a username, and a password.
+
+This means that Virtual Hosting is being applied.
+
+To be able to access this domain, we will need to include it in /etc/hosts.
+
+![](/images/hosting.png)
+
 <!--more-->
 
