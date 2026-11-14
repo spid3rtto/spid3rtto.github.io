@@ -10,6 +10,16 @@
 
     {% include meta.html %}
 
+    <!-- Evita el parpadeo blanco/oscuro cargando el tema guardado antes de pintar la página -->
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+
     <!--[if lt IE 9]>
       <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -17,8 +27,121 @@
     <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
     <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
 
-    <!-- Compacta tarjetas SOLO en la portada (.posts) y mantiene el ancho normal al abrir el post -->
+    <!-- Ajuste dinámico de tarjetas, imágenes y sistema de Modo Oscuro / Claro -->
     <style>
+      :root {
+        --bg-main: #181818;
+        --bg-card: #1f1f1f;
+        --bg-footer: #141414;
+        --bg-code: #252526;
+        --text-main: #d4d4d4;
+        --text-heading: #f0f0f0;
+        --text-muted: #9a9a9a;
+        --border-accent: #8a7c63;
+        --border-subtle: #2e2e2e;
+        --link-color: #4da3ff;
+      }
+
+      html[data-theme="light"] {
+        --bg-main: #f5f6f8;
+        --bg-card: #ffffff;
+        --bg-footer: #eaeef2;
+        --bg-code: #eef1f5;
+        --text-main: #24292f;
+        --text-heading: #111827;
+        --text-muted: #57606a;
+        --border-accent: #8a7c63;
+        --border-subtle: #d0d7de;
+        --link-color: #0969da;
+      }
+
+      /* Aplicación de colores según el tema activo */
+      body {
+        background-color: var(--bg-main) !important;
+        color: var(--text-main) !important;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      h1, h2, h3, h4, h5, h6,
+      h1 a, h2 a, .site-name a {
+        color: var(--text-heading) !important;
+      }
+
+      .site-description {
+        color: var(--text-muted) !important;
+      }
+
+      nav a {
+        color: var(--text-main) !important;
+      }
+
+      nav a:hover {
+        color: var(--link-color) !important;
+      }
+
+      .masthead {
+        border-bottom-color: var(--border-subtle) !important;
+      }
+
+      .wrapper-footer {
+        background-color: var(--bg-footer) !important;
+        border-top: 1px solid var(--border-subtle) !important;
+      }
+
+      .posts > .post {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-accent) !important;
+        transition: background-color 0.2s ease;
+      }
+
+      html[data-theme="light"] .posts > .post {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Adapta también la caja [+] TARGET SUMMARY en modo claro */
+      html[data-theme="light"] [style*="rgba(255, 255, 255, 0.03)"] {
+        background: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .entry a, .read-more {
+        color: var(--link-color) !important;
+      }
+
+      pre, code, .highlight {
+        background-color: var(--bg-code) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-subtle) !important;
+      }
+
+      /* Estilo del botón de cambio de tema en la barra superior */
+      #theme-toggle {
+        background: transparent;
+        border: 1px solid var(--border-accent);
+        color: var(--text-heading);
+        border-radius: 6px;
+        padding: 5px 8px;
+        margin-left: 18px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        transition: background-color 0.2s ease, transform 0.15s ease;
+      }
+
+      #theme-toggle:hover {
+        background-color: rgba(138, 124, 99, 0.18);
+        transform: scale(1.05);
+      }
+
+      #theme-toggle svg {
+        width: 16px;
+        height: 16px;
+        display: block;
+      }
+
+      /* Compacta tarjetas SOLO en la portada (.posts) y mantiene ancho normal en el post */
       .posts {
         display: flex;
         flex-direction: column;
@@ -64,7 +187,6 @@
         border-radius: 4px;
       }
 
-      /* Restaura las proporciones normales al abrir el post completo */
       #main > article.post {
         display: block !important;
         width: 100% !important;
@@ -88,6 +210,9 @@
           <nav>
             <a href="{{ site.baseurl }}/">Blog</a>
             <a href="{{ site.baseurl }}/about">About</a>
+            <button id="theme-toggle" type="button" aria-label="Cambiar tema claro/oscuro" title="Cambiar tema">
+              <!-- El icono se actualiza automáticamente vía JS -->
+            </button>
           </nav>
         </header>
       </div>
@@ -106,6 +231,35 @@
     </div>
 
     {% include analytics.html %}
+
+    <!-- Lógica del botón Modo Oscuro / Claro -->
+    <script>
+      (function() {
+        const toggleBtn = document.getElementById('theme-toggle');
+        const sunIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+        const moonIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+
+        function updateIcon() {
+          const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+          toggleBtn.innerHTML = isLight ? moonIcon : sunIcon;
+          toggleBtn.title = isLight ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro';
+        }
+
+        updateIcon();
+
+        toggleBtn.addEventListener('click', function() {
+          const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+          if (isLight) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+          }
+          updateIcon();
+        });
+      })();
+    </script>
 
     <!-- Carga de Medium Zoom desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js"></script>
