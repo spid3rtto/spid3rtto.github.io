@@ -10,6 +10,10 @@ layout: default
 
       <div class="entry">
         {{ post.excerpt }}
+
+        {% if post.cover %}
+          <img src="{{ post.cover | relative_url }}" alt="{{ post.title }}" />
+        {% endif %}
       </div>
 
       <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More</a>
