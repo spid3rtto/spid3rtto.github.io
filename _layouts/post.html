@@ -5,6 +5,34 @@ layout: default
 <article class="post">
   <h1>{{ page.title }}</h1>
 
+  {% if page.cover or page.platform or page.machine or page.os or page.difficulty or page.vectors or page.tools %}
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; margin: 20px 0 25px 0;">
+    
+    {% if page.cover %}
+    <div style="flex: 0 0 auto; max-width: 100%; display: flex; align-items: center;">
+      <img src="{{ page.cover | relative_url }}" alt="{{ page.title }}" style="margin: 0; border-radius: 6px; display: block; max-height: 280px; width: auto; max-width: 100%; object-fit: contain;" />
+    </div>
+    {% endif %}
+
+    {% if page.platform or page.machine or page.os or page.difficulty or page.vectors or page.tools %}
+    <div style="flex: 1 1 260px; background: rgba(255, 255, 255, 0.03); border: 1px solid #8a7c63; border-radius: 6px; padding: 16px 20px; font-family: monospace; font-size: 14px; display: flex; flex-direction: column; justify-content: center;">
+      <div style="color: #8a7c63; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid rgba(138, 124, 99, 0.3); padding-bottom: 6px; letter-spacing: 0.5px;">
+        [+] TARGET SUMMARY
+      </div>
+      <ul style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
+        {% if page.platform %}<li><strong>Platform:</strong> {{ page.platform }}</li>{% endif %}
+        {% if page.machine %}<li><strong>Machine:</strong> {{ page.machine }}</li>{% endif %}
+        {% if page.os %}<li><strong>OS:</strong> {{ page.os }}</li>{% endif %}
+        {% if page.difficulty %}<li><strong>Difficulty:</strong> {{ page.difficulty }}</li>{% endif %}
+        {% if page.vectors %}<li><strong>Vectors:</strong> {{ page.vectors }}</li>{% endif %}
+        {% if page.tools %}<li><strong>Tools:</strong> {{ page.tools }}</li>{% endif %}
+      </ul>
+    </div>
+    {% endif %}
+
+  </div>
+  {% endif %}
+
   <div class="entry">
     {{ content }}
   </div>
