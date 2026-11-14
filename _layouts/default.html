@@ -44,17 +44,20 @@
       .posts > .post .entry p,
       article.post .entry p {
         width: 100% !important;
-        text-align: left;
+        text-align: left !important;
         box-sizing: border-box !important;
       }
 
+      /* Apila el texto arriba y la imagen abajo en columna para no ensanchar la tarjeta */
       .posts > .post .entry p:has(img),
       article.post .entry p:has(img) {
         display: flex !important;
-        justify-content: center !important;
-        text-align: center !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
       }
 
+      /* Centra la imagen horizontalmente debajo del texto */
       .posts > .post img,
       article.post img {
         display: block !important;
@@ -62,7 +65,7 @@
         width: auto !important;
         height: auto !important;
         max-width: 100% !important;
-        margin: 12px auto !important;
+        margin: 14px auto 4px auto !important;
         border-radius: 4px;
       }
     </style>
