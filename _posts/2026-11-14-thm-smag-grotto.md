@@ -111,7 +111,7 @@ helpdesk : cH4nG3M3_n0w
 
 Upon logging in, we discover what appears to be a type of webshell.
 
-![](/images/login_area.png)
+![](/images/web_shell.png)
 
 We tried running some basic commands, but it didn't show us the output.
 
