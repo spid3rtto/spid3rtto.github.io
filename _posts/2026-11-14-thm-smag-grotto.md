@@ -149,9 +149,13 @@ Now we'll listen with nc
 
 We will set up a server using Python 3 to share the index.html file.
 
+We need to be in the same folder as index.html for this to work.
+
 ```bash
 sudo python3 -m http.server 80
 ```
+
+![](/images/server_path.png)
 
 We will do it this way to bypass any restrictions, in case the web shell has any.
 
