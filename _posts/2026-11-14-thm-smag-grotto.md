@@ -311,7 +311,7 @@ By running `sudo -l`, we can see that we have permissions for this binary.
 
 The binary states that we can execute it as any user, without a password.
 
-To exploit this binary, we can use the website <gtfobins.org>
+To exploit this binary, we can use the website <https://gtfobins.org>
 
 Here are the steps to take advantage of these privileges and gain root access.
 
