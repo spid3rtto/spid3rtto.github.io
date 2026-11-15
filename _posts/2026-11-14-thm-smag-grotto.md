@@ -135,7 +135,7 @@ Upon returning to our terminal, we see that we do indeed have RCE!
 
 Now, we will gain access to the machine.
 
-Now we will create an `index.html`, which in reality will not be HTML, but rather a bash script.
+Now we will create an `index.html`  , which in reality will not be HTML, but rather a bash script.
 
 ![](/images/reverse_shell.png)
 
