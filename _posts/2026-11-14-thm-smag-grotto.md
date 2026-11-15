@@ -271,6 +271,9 @@ And we write:
 ```bash
 stty size
 ```
+
+![](/images/stty.png)
+
 You need to enter these values ​​into the victim machine as follows (the specific values ​​will depend on your own setup).
 
 ```bash
