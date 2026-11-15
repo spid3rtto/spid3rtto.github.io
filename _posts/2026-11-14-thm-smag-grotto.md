@@ -95,5 +95,44 @@ To be able to access this domain, we will need to include it in /etc/hosts.
 
 ![](/images/hosting.png)
 
+Let's see what this subdomain contains.
+
+![](/images/content_subdomain.png)
+
+Alright! As you can see, we have two resources that we couldn't access when using the IP address.
+
+When attempting to access admin.php, we are redirected to login.php; so, let’s enter the credentials we found.
+
+```bash
+helpdesk : cH4nG3M3_n0w
+```
+
+![](/images/login_area.png)
+
+Upon logging in, we discover what appears to be a type of webshell.
+
+![](/images/login_area.png)
+
+We tried running some basic commands, but it didn't show us the output.
+
+To verify that it was a webshell, we sent ICMP traces to our own machine.
+
+To do this, we will first set our machine to listen for ICMP traces.
+
+```bash
+sudo tcpdump -i tun0 -n icmp
+```
+
+![](/images/listening_icmp.png)
+
+Now, from the web shell, we send ICMP traces to verify that we have RCE.
+
+![](/images/rce.png)
+
+Upon returning to our terminal, we see that we do indeed have RCE!
+
+![](/images/validate_rce.png)
+
+Now, we will gain access to the machine.
 <!--more-->
 
