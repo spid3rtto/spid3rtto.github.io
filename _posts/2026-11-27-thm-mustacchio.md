@@ -69,7 +69,7 @@ We go to the "About" section and see that it contains an image and strange words
 
 ![](/writeup_mustacchio/about-page.png)
 
-Here you might think there When running fuzzing, we find two directories: images and custom. We will go for custom, as it is the one that caught my attention the most.is some strange text hidden between the words, but... no, that's not the case.
+You might think there’s some strange text hidden among these words, but no... that’s not the case.
 
 Or you might also try downloading this image to see if it has any strange metadata, but that's not it either.
 
