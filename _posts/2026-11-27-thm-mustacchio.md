@@ -176,3 +176,87 @@ As we can see, it's an admin panel where we could now try entering the credentia
 ![](/writeup_mustacchio/probing-credential.png)
 
 Awesome, we logged into this admin panel with those credentials!
+
+![](/writeup_mustacchio/adminpanel.png)
+
+Well, we see that the webpage asks us to add a comment, let's do it.
+
+![](/writeup_mustacchio/comment-page.png)
+
+When we click the submit button, the following is displayed:
+
+![](/writeup_mustacchio/comment-page2.png)
+
+It seems it wants us to add the  `name`  ,  `author`  , and  `comment`  fields; let's run another test sending those fields.
+
+![](/writeup_mustacchio/fields-comment.png)
+
+And when I try to send it... nothing happens; the request wasn't processed.
+
+![](/writeup_mustacchio/comment-page2.png)
+
+At that point, I decided to take a look at the website to see how it interpreted those fields and to check if we were getting the expected output for our data
+
+When we checked out the website, we came across this big surprise
+
+![](/writeup_mustacchio/inspection-web.png)
+
+We had a .bak file and supposedly an SSH key from our friend Barry
+
+First, let's download the .bak file
+
+![](/writeup_mustacchio/download-bak.png)
+
+All right, upon analyzing the file, we were surprised to find that it is an XML text file; it appears to contain what might be the structure of the page's comments.
+
+![](/writeup_mustacchio/analyzing-xml.png)
+
+Let's copy the contents of the XML file and test it on the website.
+
+![](/writeup_mustacchio/comment-xml-structure.png)
+
+When we sent this structure in XML... the data output was displayed to us
+
+![](/writeup_mustacchio/xml-output.png)
+
+At that point, I began to suspect that an XXE attack might be underway.
+
+What is it?
+
+An XXE attack is an attack in which you can send a malicious XML structure to the server so that it attempts to parse it, and the response allows you to view, for example, unauthorized files on the server.
+
+Let's give it a try, then
+
+First, we need to copy the structure required for the comments field exactly as it is.
+
+![](/writeup_mustacchio/xxe-test.png)
+
+Nowadays, we can find malicious XXE constructs online; here's an example
+
+![](/writeup_mustacchio/example-xxe.png)
+
+We'll have to copy that XML code structure and see if we can figure out how to read the /etc/passwd file.
+
+Our clean XML code should look like this so we can send it to the server and wait for the output
+
+![](/writeup_mustacchio/estructure-xxe-payload.png)
+
+("Remember that you must always place the entity in a valid field in the XML; otherwise, the XXE will not execute.")
+
+When we send our payload, the server's response is... Success! We managed to execute the XXE!
+
+![](/writeup_mustacchio/xxe-success.png)
+
+Well, now that we've validated the vulnerability, why don't we write a Python 3 script to automate this?
+
+First, we'll need to intercept the data request before it reaches the server.
+
+In this case, we'll be using Burp Suite, which acts as an intermediary proxy, intercepting the request before it reaches the server
+
+When we intercept the request, we see this
+
+![](/writeup_mustacchio/intercept-data.png)
+
+Our URL-encoded XML structure is being sent via an XML parameter.
+
+Here's the Python 3 script so you can run it:
